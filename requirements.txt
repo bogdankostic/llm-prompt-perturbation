@@ -1,0 +1,6 @@
+datasets
+haystack-ai
+tqdm
+wn
+spacy
+lemminflect
