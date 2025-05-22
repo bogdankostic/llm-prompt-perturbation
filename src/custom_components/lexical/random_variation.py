@@ -1,5 +1,7 @@
 import random
-from typing import Optional, Dict
+from typing import Optional
+
+from haystack import component, default_to_dict
 import spacy
 import wn
 from .synonym_variation import LexicalVariator, POS_MAPPING
@@ -43,6 +45,9 @@ class RandomLexicalVariator(LexicalVariator):
             wn.download(wordnet_version)
             self.wordnet = wn.Wordnet(wordnet_version)
 
+        self.spacy_model_name = spacy_model
+        self.wordnet_version = wordnet_version
+        self.random_seed = random_seed
         random.seed(random_seed)
     
     def _process_token(self, token: spacy.tokens.Token) -> str:
@@ -74,3 +79,16 @@ class RandomLexicalVariator(LexicalVariator):
         except Exception as e:
             # Fallback to original token if inflection fails
             return token.text_with_ws
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the component's configuration to a dictionary.
+
+        :return: A dictionary containing the component's configuration parameters.
+        """
+        return default_to_dict(
+            self,
+            spacy_model=self.spacy_model_name,
+            wordnet_version=self.wordnet_version,
+            random_seed=self.random_seed
+        )

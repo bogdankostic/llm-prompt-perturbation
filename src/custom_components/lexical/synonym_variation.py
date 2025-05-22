@@ -1,6 +1,6 @@
 import random
 from typing import List, Optional, Dict, Any
-from haystack import component
+from haystack import component, default_to_dict
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 import spacy
@@ -193,3 +193,18 @@ class LexicalVariator:
         instruction += f" {additional_context}\"" if additional_context else "\""
         return instruction
     
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the component's configuration to a dictionary.
+
+        :return: A dictionary containing the component's configuration parameters.
+        """
+
+        wsd_model_dict = self.wsd_model.to_dict()
+        return default_to_dict(
+            self, 
+            wsd_model=wsd_model_dict,
+            spacy_model=self.spacy_model_name, 
+            wordnet_version=self.wordnet_version, 
+            random_seed=self.random_seed
+        )
