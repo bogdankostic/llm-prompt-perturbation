@@ -4,6 +4,7 @@ from haystack import component
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 import spacy
+from spacy.tokens import Token
 from lemminflect import getInflection
 import wn
 
@@ -76,7 +77,7 @@ class LexicalVariator:
     
     def _process_token(
         self, 
-        token: spacy.token.Token, 
+        token: Token, 
         text: str, 
         additional_context: Optional[str]
     ) -> str:

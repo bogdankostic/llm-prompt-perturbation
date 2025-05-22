@@ -1,7 +1,7 @@
 import random
 from typing import Optional, Dict
 from haystack import component
-import spacy
+from spacy.tokens import Token
 import wn
 from .synonym_variation import LexicalVariator, POS_MAPPING
 
@@ -46,7 +46,7 @@ class RandomLexicalVariator(LexicalVariator):
 
         random.seed(random_seed)
     
-    def _process_token(self, token: spacy.token.Token) -> str:
+    def _process_token(self, token: Token) -> str:
         """
         Process a single token and return its randomly varied form if applicable.
 
