@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from haystack import component, default_to_dict
 import spacy
