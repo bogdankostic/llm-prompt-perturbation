@@ -1,6 +1,6 @@
 from typing import Optional
 from haystack import component
-from spacy.tokens import Token
+import spacy
 from .synonym_variation import LexicalVariator, POS_MAPPING
 import random
 
@@ -20,7 +20,7 @@ class WrongSenseLexicalVariator(LexicalVariator):
     
     def _process_token(
         self, 
-        token: Token, 
+        token: spacy.tokens.Token, 
         text: str, 
         additional_context: Optional[str]
     ) -> str:
