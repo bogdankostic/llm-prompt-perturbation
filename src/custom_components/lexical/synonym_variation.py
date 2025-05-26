@@ -95,7 +95,10 @@ class LexicalVariator:
         if not synsets:
             return token.text_with_ws
 
-        synset = self._disambiguate_word(token.lemma_, text, synsets, additional_context) if len(synsets) > 1 else synsets[0]
+        if len(synsets) == 1:
+            synset = synsets[0] 
+        else:
+            synset = self._disambiguate_word(token.lemma_, text, synsets, additional_context)
         lemmas = [lemma for lemma in synset.lemmas() if lemma != token.lemma_]
         
         # If no other lemmas are available, return original token

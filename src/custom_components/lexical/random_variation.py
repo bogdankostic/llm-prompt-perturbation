@@ -50,11 +50,18 @@ class RandomLexicalVariator(LexicalVariator):
         self.random_seed = random_seed
         random.seed(random_seed)
     
-    def _process_token(self, token: spacy.tokens.Token) -> str:
+    def _process_token(
+        self, 
+        token: spacy.tokens.Token,
+        text: str,
+        additional_context: Optional[str]
+    ) -> str:
         """
         Process a single token and return its randomly varied form if applicable.
 
         :param token: The spaCy token to process
+        :param text: The original text (unused in random variation)
+        :param additional_context: Optional additional context (unused in random variation)
         """
         # Get all synsets for the given POS
         pos = POS_MAPPING[token.pos_]

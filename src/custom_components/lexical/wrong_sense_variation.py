@@ -35,7 +35,7 @@ class WrongSenseLexicalVariator(LexicalVariator):
         # Get all synsets for the lemma
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
-        if not synsets:
+        if not synsets or len(synsets) == 1:
             return token.text_with_ws
 
         # Get the predicted synset from WSD
