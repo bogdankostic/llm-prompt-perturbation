@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-prompt-perturbation"
+version = "0.1.0"
+authors = [
+    { name = "Bogdan" }
+]
+description = "LLM Prompt Perturbation Experiments"
+requires-python = ">=3.10"
+dependencies = [
+    "datasets",
+    "haystack-ai",
+    "tqdm",
+    "wn",
+    "spacy",
+    "lemminflect",
+    "transformers",
+    "torch",
+    "tiktoken",
+    "blobfile",
+    "protobuf",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"] 
