@@ -8,6 +8,9 @@ spec:
       labels:
         app: mmlu-gpt4-1-nano-no-perturbation
     spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
       containers:
       - name: mmlu-gpt4-1-nano-no-perturbation
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
