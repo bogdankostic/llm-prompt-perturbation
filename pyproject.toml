@@ -17,8 +17,6 @@ dependencies = [
     "wn",
     "spacy",
     "lemminflect",
-    "transformers",
-    "torch",
     "tiktoken",
     "blobfile",
     "protobuf",

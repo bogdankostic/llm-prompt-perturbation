@@ -4,7 +4,6 @@ from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
 from haystack.components.generators.openai import OpenAIGenerator
 from haystack.components.builders.prompt_builder import PromptBuilder
-from haystack.components.builders.answer_builder import AnswerBuilder
 from haystack.utils import Secret
 from tqdm import tqdm
 
@@ -70,4 +69,4 @@ experiment.add_metrics({
     "exact_match": exact_match,
 })
 
-experiment.save("data/experiments/mmlu/no_perturbation.json")
+experiment.save("/experiments/mmlu/no_perturbation.json")

@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mmlu-gpt4-1-nano-no-perturbation
+spec:
+  template:
+    metadata:
+      labels:
+        app: mmlu-gpt4-1-nano-no-perturbation
+    spec:
+      containers:
+      - name: mmlu-gpt4-1-nano-no-perturbation
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["/bin/sh", "-c"]
+        args: ["python", "src/experiment_runs/mmlu/no_perturbation.py"]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
