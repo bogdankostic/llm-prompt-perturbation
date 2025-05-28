@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from datasets import load_dataset
+from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
 from haystack.components.generators.openai import OpenAIGenerator
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -61,33 +61,34 @@ experiment = Experiment(
     model="gpt-4.1-nano-2025-04-14"
 )
 
-#ds = load_dataset("tasksource/mmlu", "anatomy", split="test")
-ds = load_dataset("tasksource/mmlu", split="train")
+dataset_names = get_dataset_config_names("tasksource/mmlu")
 predictions = defaultdict(list)
-for sample in tqdm(ds):
-    # Preprocess: vary the question and choices separately
-    variated_question = lexical_variator.run(
-        sample["question"], 
-        additional_context="\n".join(sample["choices"])
-    )["text"]
-    variated_choices = []
-    for idx, choice in enumerate(sample["choices"]):
-        variated_choice = lexical_variator.run(
-            choice, 
-            additional_context=sample["question"] + f"\n{'\n'.join([sample['choices'][i] for i in range(len(sample['choices'])) if i != idx])}"
+for dataset_name in tqdm(dataset_names, desc="Dataset"):
+    data = load_dataset("tasksource/mmlu", name=dataset_name, split="test")
+    for sample in tqdm(data, desc="Sample"):
+        # Preprocess: vary the question and choices separately
+        variated_question = lexical_variator.run(
+            sample["question"], 
+            additional_context="\n".join(sample["choices"])
         )["text"]
-        variated_choices.append(variated_choice)
+        variated_choices = []
+        for idx, choice in enumerate(sample["choices"]):
+            variated_choice = lexical_variator.run(
+                choice, 
+                additional_context=sample["question"] + f"\n{'\n'.join([sample['choices'][i] for i in range(len(sample['choices'])) if i != idx])}"
+            )["text"]
+            variated_choices.append(variated_choice)
 
-    response = pipeline.run({
-        "question": variated_question,
-        "choices": variated_choices
-    })
-    predictions["question"].append(sample["question"])
-    predictions["answer"].append(answer_mapping[sample["answer"]])
-    predictions["prediction"].append(response["generator"]["replies"][0][0])
-    predictions["output"].append(response["generator"]["replies"][0])
-    predictions["variated_question"].append(variated_question)
-    predictions["variated_choices"].append(variated_choices)
+        response = pipeline.run({
+            "question": variated_question,
+            "choices": variated_choices
+        })
+        predictions["question"].append(sample["question"])
+        predictions["answer"].append(answer_mapping[sample["answer"]])
+        predictions["prediction"].append(response["generator"]["replies"][0][0])
+        predictions["output"].append(response["generator"]["replies"][0])
+        predictions["variated_question"].append(variated_question)
+        predictions["variated_choices"].append(variated_choices)
 
 
 experiment.add_predictions(predictions)
@@ -100,4 +101,4 @@ experiment.add_metrics({
     "exact_match": exact_match,
 })
 
-experiment.save("data/experiments/mmlu/lexical/synonym_perturbation.json")
+experiment.save("/experiments/mmlu/lexical/synonym_perturbation.json")
