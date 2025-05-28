@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 
 from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
@@ -27,7 +28,7 @@ system_prompt = """You are a helpful assistant that can answer multiple choice q
 wsd_model = OpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
     model="swap-uniba/LLM-wsd-FT-ALL",
-    api_base_url="http://localhost:8000/v1",
+    api_base_url=f"{os.environ['WSD_MODEL_ENDPOINT']}/v1",
     generation_kwargs = {"max_tokens": 512}
 )
 

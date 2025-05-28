@@ -24,6 +24,8 @@ spec:
               key: api-key
         - name: PLACEHOLDER
           value: "placeholder"
+        - name: WSD_MODEL_ENDPOINT
+          value: "http://wsd-model.bdarabisahneh.svc.cluster.local:8000"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:
