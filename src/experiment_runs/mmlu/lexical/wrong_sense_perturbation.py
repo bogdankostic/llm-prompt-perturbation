@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from datasets import load_dataset
+from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
 from haystack.components.generators.openai import OpenAIGenerator
 from haystack.components.generators.chat import OpenAIChatGenerator
