@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mmlu-gpt4-1-nano-random-perturbation
+spec:
+  template:
+    metadata:
+      labels:
+        app: mmlu-gpt4-1-nano-random-perturbation
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: mmlu-gpt4-1-nano-random-perturbation
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python"]
+        args: ["-u", "/llm_prompt_perturbation/src/experiment_runs/mmlu/lexical/random_perturbation.py"]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc

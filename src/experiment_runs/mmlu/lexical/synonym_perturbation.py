@@ -84,6 +84,7 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
             "question": variated_question,
             "choices": variated_choices
         })
+        predictions["dataset"].append(dataset_name)
         predictions["question"].append(sample["question"])
         predictions["answer"].append(answer_mapping[sample["answer"]])
         predictions["prediction"].append(response["generator"]["replies"][0][0])
