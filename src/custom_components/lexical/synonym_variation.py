@@ -1,5 +1,7 @@
+import logging
 import random
 from typing import List, Optional, Dict, Any
+
 from haystack import component, default_to_dict
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
@@ -169,7 +171,9 @@ class LexicalVariator:
         synset_idx = int(answer_text[0]) - 1
         
         if not 0 <= synset_idx < len(synsets):
-            raise ValueError(f"Invalid synset index {synset_idx} for {len(synsets)} synsets")
+            # Log a warning and return the first synset
+            logging.warning(f"Invalid synset index {synset_idx} for {len(synsets)} synsets")
+            synset_idx = 0
             
         return synsets[synset_idx]
     
