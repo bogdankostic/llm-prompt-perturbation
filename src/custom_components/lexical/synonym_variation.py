@@ -60,37 +60,49 @@ class LexicalVariator:
         self.random_seed = random_seed
         random.seed(random_seed)
 
-    @component.output_types(text=str)
-    def run(self, text: str, additional_context: Optional[str] = None) -> Dict[str, str]:
+    @component.output_types(text=str, changed_tokens=List[str], unchanged_tokens=List[str])
+    def run(self, text: str, context: Optional[str] = None) -> Dict[str, str]:
         """
         Vary the lexical content of a text by replacing words with their synonyms.
 
         :param text: The text to vary.
-        :param additional_context: Optional additional context to use for word sense disambiguation.
+        :param context: Context to use for word sense disambiguation.
         """
         # Apply spaCy to the text for POS tagging and lemmatization
         analyzed_text = self.spacy_model(text)
+
+        if context is None:
+            context = text
+
         output_text = ""
+        changed_tokens = []
+        unchanged_tokens = []
         for token in analyzed_text:
             if token.pos_ in POS_MAPPING.keys():
-                output_text += self._process_token(token, text, additional_context)
+                new_token = self._process_token(token, context)
+                output_text += self._process_token(token, context)
+
+                if new_token != token.text_with_ws:
+                    changed_tokens.append(token.text)
+                else:
+                    unchanged_tokens.append(token.text)
             else:
                 output_text += token.text_with_ws
+                unchanged_tokens.append(token.text)
 
-        return {"text": output_text}
+        return {"text": output_text, "changed_tokens": changed_tokens, "unchanged_tokens": unchanged_tokens}
     
     def _process_token(
         self, 
         token: spacy.tokens.Token, 
-        text: str, 
-        additional_context: Optional[str]
+        context: str
     ) -> str:
         """
         Process a single token and return its varied form if applicable.
 
         :param token: The spaCy token to process
         :param text: The original text for context
-        :param additional_context: Optional additional context
+        :param context: Context to use for word sense disambiguation.
         """
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
@@ -100,7 +112,7 @@ class LexicalVariator:
         if len(synsets) == 1:
             synset = synsets[0] 
         else:
-            synset = self._disambiguate_word(token.lemma_, text, synsets, additional_context)
+            synset = self._disambiguate_word(token.lemma_, synsets, context)
         lemmas = [lemma for lemma in synset.lemmas() if lemma != token.lemma_]
         
         # If no other lemmas are available, return original token
@@ -122,8 +134,6 @@ class LexicalVariator:
 
         :param lemma: The lemma to inflect
         :param tag: The POS tag to use for inflection
-        :return: The inflected form of the lemma
-        :raises ValueError: If inflection fails for the given lemma and tag
         """
         lemma_parts = lemma.split()
         # Handle multi-word lemmas by inflecting only the first word
@@ -151,9 +161,8 @@ class LexicalVariator:
     def _disambiguate_word(
         self, 
         word: str, 
-        text: str, 
         synsets: List[wn.Synset], 
-        additional_context: Optional[str]
+        context: str
     ) -> wn.Synset:
         """
         Select the most appropriate synset for a word based on context.
@@ -161,9 +170,9 @@ class LexicalVariator:
         :param word: The word to disambiguate
         :param text: The original text for context
         :param synsets: List of possible synsets
-        :param additional_context: Optional additional context
+        :param context: Context to use for word sense disambiguation.
         """
-        instruction = self._build_wsd_instruction(word, text, synsets, additional_context)
+        instruction = self._build_wsd_instruction(word, synsets, context)
         messages = [ChatMessage.from_user(instruction)]
         
         reply = self.wsd_model.run(messages)
@@ -180,9 +189,8 @@ class LexicalVariator:
     def _build_wsd_instruction(
         self, 
         word: str, 
-        text: str, 
         synsets: List[wn.Synset], 
-        additional_context: Optional[str]
+        context: str
     ) -> str:
         """
         Build the instruction for the WSD model.
@@ -190,14 +198,12 @@ class LexicalVariator:
         :param word: The word to disambiguate
         :param text: The original text
         :param synsets: List of possible synsets
-        :param additional_context: Optional additional context
-        :return: The formatted instruction string
+        :param context: Context to use for word sense disambiguation.
         """
         instruction = f"Given the word \"{word}\" in the input sentence, choose the correct meaning for the following:\n"
         for idx, synset in enumerate(synsets):
             instruction += f"{idx+1}) {synset.definition()}\n"
-        instruction += f"\nGenerate only the number of the selected option. Input: \"{text}"
-        instruction += f" {additional_context}\"" if additional_context else "\""
+        instruction += f"\nGenerate only the number of the selected option. Input: \"{context}"
         return instruction
     
     def to_dict(self) -> Dict[str, Any]:
