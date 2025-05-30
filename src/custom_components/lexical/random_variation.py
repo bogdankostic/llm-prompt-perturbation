@@ -63,14 +63,14 @@ class RandomLexicalVariator(LexicalVariator):
         """
         # Get all synsets for the given POS
         pos = POS_MAPPING[token.pos_]
-        all_synsets = list(self.wordnet.synsets(pos=pos))
+        all_synsets = self.wordnet.synsets(pos=pos)
         
         if not all_synsets:
             return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
         # Randomly select a synset
         random_synset = random.choice(all_synsets)
-        lemmas = list(random_synset.lemmas())
+        lemmas = random_synset.lemmas()
         
         # If no lemmas are available, return original token
         if not lemmas:
