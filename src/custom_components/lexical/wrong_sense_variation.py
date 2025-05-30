@@ -24,8 +24,8 @@ class WrongSenseLexicalVariator(LexicalVariator):
         context: str
     ) -> Dict[str, Any]:
         """
-        Process a single token and return its varied form if applicable, using the worst fitting synset
-        by recursively removing the best predicted synset.
+        Process a single token and return its varied form if applicable, using a random synset
+        that is not the best predicted one.
 
         :param token: The spaCy token to process
         :param context: Context to use for word sense disambiguation.
@@ -36,15 +36,13 @@ class WrongSenseLexicalVariator(LexicalVariator):
         if not synsets or len(synsets) == 1:
             return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
-        # Recursively remove the best predicted synset until we have only one left
-        remaining_synsets = synsets.copy()
-        while len(remaining_synsets) > 1:
-            best_synset = self._disambiguate_word(token.lemma_, remaining_synsets, context)
-            remaining_synsets.remove(best_synset)
+        # Get the best predicted synset and remove it
+        best_synset = self._disambiguate_word(token.lemma_, synsets, context)
+        remaining_synsets = [s for s in synsets if s != best_synset]
         
-        # The last remaining synset is our worst fitting one
-        worst_synset = remaining_synsets[0]
-        lemmas = [lemma for lemma in worst_synset.lemmas() if lemma != token.lemma_]
+        # Randomly select one of the remaining synsets
+        selected_synset = random.choice(remaining_synsets)
+        lemmas = [lemma for lemma in selected_synset.lemmas() if lemma != token.lemma_]
         
         # If no other lemmas are available, return original token
         if not lemmas:
