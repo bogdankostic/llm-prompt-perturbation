@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 from haystack import component, default_to_dict
 import spacy
 import wn
-from .synonym_variation import LexicalVariator, POS_MAPPING
+from .synonym_variation import LexicalVariator
 
 
 @component
@@ -48,6 +48,12 @@ class RandomLexicalVariator(LexicalVariator):
         self.spacy_model_name = spacy_model
         self.wordnet_version = wordnet_version
         self.random_seed = random_seed
+        self.synset_per_pos = {
+            "ADJ": self.wordnet.synsets(pos="a"),
+            "ADV": self.wordnet.synsets(pos="r"),
+            "NOUN": self.wordnet.synsets(pos="n"), 
+            "VERB": self.wordnet.synsets(pos="v")
+        }
         random.seed(random_seed)
     
     def _process_token(
@@ -62,8 +68,7 @@ class RandomLexicalVariator(LexicalVariator):
         :param context: Context to use for word sense disambiguation. Not used in random variation.
         """
         # Get all synsets for the given POS
-        pos = POS_MAPPING[token.pos_]
-        all_synsets = self.wordnet.synsets(pos=pos)
+        all_synsets = self.synset_per_pos[token.pos_]
         
         if not all_synsets:
             return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
