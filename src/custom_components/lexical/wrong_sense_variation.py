@@ -39,7 +39,7 @@ class WrongSenseLexicalVariator(LexicalVariator):
         # Recursively remove the best predicted synset until we have only one left
         remaining_synsets = synsets.copy()
         while len(remaining_synsets) > 1:
-            best_synset = self._disambiguate_word(token.lemma_, context, remaining_synsets)
+            best_synset = self._disambiguate_word(token.lemma_, remaining_synsets, context)
             remaining_synsets.remove(best_synset)
         
         # The last remaining synset is our worst fitting one
