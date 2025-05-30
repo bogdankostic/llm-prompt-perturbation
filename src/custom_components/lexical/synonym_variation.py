@@ -1,6 +1,7 @@
+from collections import defaultdict
 import logging
 import random
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 
 from haystack import component, default_to_dict
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -60,7 +61,7 @@ class LexicalVariator:
         self.random_seed = random_seed
         random.seed(random_seed)
 
-    @component.output_types(text=str, changed_tokens=List[str], unchanged_tokens=List[str])
+    @component.output_types(text=str, metadata=Dict[str, Any])
     def run(self, text: str, context: Optional[str] = None) -> Dict[str, str]:
         """
         Vary the lexical content of a text by replacing words with their synonyms.
@@ -75,28 +76,32 @@ class LexicalVariator:
             context = text
 
         output_text = ""
-        changed_tokens = []
-        unchanged_tokens = []
+        metadata = defaultdict(list)
+        n_changed_tokens = 0
         for token in analyzed_text:
             if token.pos_ in POS_MAPPING.keys():
-                new_token = self._process_token(token, context)
-                output_text += self._process_token(token, context)
-
+                new_token_dict = self._process_token(token, context)
+                new_token = new_token_dict["new_token"]
+                output_text += new_token
+                metadata["n_synsets"].append(new_token_dict["n_synsets"])
+                metadata["n_lemmas"].append(new_token_dict["n_lemmas"])
+                metadata["changes"].append((token.text, new_token.strip()))
                 if new_token != token.text_with_ws:
-                    changed_tokens.append(token.text)
-                else:
-                    unchanged_tokens.append(token.text)
+                    n_changed_tokens += 1
             else:
                 output_text += token.text_with_ws
-                unchanged_tokens.append(token.text)
-
-        return {"text": output_text, "changed_tokens": changed_tokens, "unchanged_tokens": unchanged_tokens}
+                metadata["n_synsets"].append(0)
+                metadata["n_lemmas"].append(0)
+                metadata["changes"].append((token.text, token.text))
+                
+        metadata["n_changed_tokens"] = n_changed_tokens
+        return {"text": output_text, "metadata": metadata}
     
     def _process_token(
         self, 
         token: spacy.tokens.Token, 
         context: str
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
         Process a single token and return its varied form if applicable.
 
@@ -107,7 +112,7 @@ class LexicalVariator:
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
         if len(synsets) == 1:
             synset = synsets[0] 
@@ -117,16 +122,19 @@ class LexicalVariator:
         
         # If no other lemmas are available, return original token
         if not lemmas:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": len(synsets), "n_lemmas": 0}
             
         selected_lemma = random.choice(lemmas)
         
         try:
             inflected_form = self._get_inflected_form(selected_lemma, token.tag_)
-            return inflected_form + token.whitespace_
+            # Preserve capitalization if the original token was capitalized
+            if token.text[0].isupper():
+                inflected_form = inflected_form[0].upper() + inflected_form[1:]
+            return {"new_token": inflected_form + token.whitespace_, "n_synsets": len(synsets), "n_lemmas": len(lemmas)}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
     
     def _get_inflected_form(self, lemma: str, tag: str) -> str:
         """
