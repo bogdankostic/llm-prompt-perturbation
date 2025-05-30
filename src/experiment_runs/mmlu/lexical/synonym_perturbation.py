@@ -29,7 +29,10 @@ wsd_model = OpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
     model="swap-uniba/LLM-wsd-FT-ALL",
     api_base_url=f"{os.environ['WSD_MODEL_ENDPOINT']}/v1",
-    generation_kwargs = {"max_tokens": 512}
+    generation_kwargs = {
+        "temperature": 0,
+        "seed": 77
+    }
 )
 
 lexical_variator = LexicalVariator(
@@ -37,7 +40,11 @@ lexical_variator = LexicalVariator(
     random_seed=77
 )
 
-prompt_builder = PromptBuilder(
+# Same instance cannot be used in multiple pipelines
+prompt_builder_1 = PromptBuilder(
+    template=prompt_template
+)
+prompt_builder_2 = PromptBuilder(
     template=prompt_template
 )
 generator = OpenAIGenerator(
@@ -50,14 +57,19 @@ generator = OpenAIGenerator(
     }
 )
 
-pipeline = Pipeline()
-pipeline.add_component(name="prompt_builder", instance=prompt_builder)
-pipeline.add_component(name="generator", instance=generator)
-pipeline.connect("prompt_builder", "generator")
+variation_pipeline = Pipeline()
+variation_pipeline.add_component(name="prompt_builder", instance=prompt_builder_1)
+variation_pipeline.add_component(name="lexical_variator", instance=lexical_variator)
+variation_pipeline.connect("prompt_builder.prompt", "lexical_variator.context")
+
+llm_pipeline = Pipeline()
+llm_pipeline.add_component(name="prompt_builder", instance=prompt_builder_2)
+llm_pipeline.add_component(name="generator", instance=generator)
+llm_pipeline.connect("prompt_builder", "generator")
 
 experiment = Experiment(
     name="mmlu_gpt4_1_nano_lexical_perturbation",
-    configs={"lexical_variator": lexical_variator.to_dict(), "pipeline": pipeline.to_dict()},
+    configs={"lexical_variator": lexical_variator.to_dict(), "pipeline": llm_pipeline.to_dict()},
     dataset="tasksource/mmlu_anatomy",
     model="gpt-4.1-nano-2025-04-14"
 )
@@ -68,19 +80,32 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
     data = load_dataset("tasksource/mmlu", name=dataset_name, split="test")
     for sample in tqdm(data, desc="Sample"):
         # Preprocess: vary the question and choices separately
-        variated_question = lexical_variator.run(
-            sample["question"], 
-            additional_context="\n".join(sample["choices"])
-        )["text"]
+        variator_response = variation_pipeline.run({
+            "prompt_builder": {
+                "question": sample["question"],
+                "choices": sample["choices"]
+            },
+            "lexical_variator": {"text": sample["question"]}
+        })
+        variated_question = variator_response["lexical_variator"]["text"]
+        question_metadata = variator_response["lexical_variator"]["metadata"]
+        
         variated_choices = []
+        choices_metadata = []
         for idx, choice in enumerate(sample["choices"]):
-            variated_choice = lexical_variator.run(
-                choice, 
-                additional_context=sample["question"] + f"\n{'\n'.join([sample['choices'][i] for i in range(len(sample['choices'])) if i != idx])}"
-            )["text"]
+            variator_response = variation_pipeline.run({
+                "prompt_builder": {
+                    "question": choice,
+                    "choices": sample["choices"]
+                },
+                "lexical_variator": {"text": choice}
+            })
+            variated_choice = variator_response["lexical_variator"]["text"]
+            choice_metadata = variator_response["lexical_variator"]["metadata"]
             variated_choices.append(variated_choice)
+            choices_metadata.append(choice_metadata)
 
-        response = pipeline.run({
+        response = llm_pipeline.run({
             "question": variated_question,
             "choices": variated_choices
         })
@@ -91,7 +116,8 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
         predictions["output"].append(response["generator"]["replies"][0])
         predictions["variated_question"].append(variated_question)
         predictions["variated_choices"].append(variated_choices)
-
+        predictions["question_metadata"].append(question_metadata)
+        predictions["choice_metadata"].append(choice_metadata)
 
 experiment.add_predictions(predictions)
 
