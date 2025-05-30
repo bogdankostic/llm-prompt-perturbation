@@ -93,7 +93,7 @@ class LexicalVariator:
                 metadata["n_synsets"].append(0)
                 metadata["n_lemmas"].append(0)
                 metadata["changes"].append((token.text, token.text))
-                
+
         metadata["n_changed_tokens"] = n_changed_tokens
         return {"text": output_text, "metadata": metadata}
     
@@ -106,7 +106,6 @@ class LexicalVariator:
         Process a single token and return its varied form if applicable.
 
         :param token: The spaCy token to process
-        :param text: The original text for context
         :param context: Context to use for word sense disambiguation.
         """
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])

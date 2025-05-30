@@ -53,22 +53,20 @@ class RandomLexicalVariator(LexicalVariator):
     def _process_token(
         self, 
         token: spacy.tokens.Token,
-        text: str,
-        additional_context: Optional[str]
-    ) -> str:
+        context: str
+    ) -> Dict[str, Any]:
         """
         Process a single token and return its randomly varied form if applicable.
 
         :param token: The spaCy token to process
-        :param text: The original text (unused in random variation)
-        :param additional_context: Optional additional context (unused in random variation)
+        :param context: Context to use for word sense disambiguation. Not used in random variation.
         """
         # Get all synsets for the given POS
         pos = POS_MAPPING[token.pos_]
         all_synsets = list(self.wordnet.synsets(pos=pos))
         
         if not all_synsets:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
         # Randomly select a synset
         random_synset = random.choice(all_synsets)
@@ -76,16 +74,19 @@ class RandomLexicalVariator(LexicalVariator):
         
         # If no lemmas are available, return original token
         if not lemmas:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
             
         selected_lemma = random.choice(lemmas)
         
         try:
             inflected_form = self._get_inflected_form(selected_lemma, token.tag_)
-            return inflected_form + token.whitespace_
+            # Preserve capitalization if the original token was capitalized
+            if token.text[0].isupper():
+                inflected_form = inflected_form[0].upper() + inflected_form[1:]
+            return {"new_token": inflected_form + token.whitespace_, "n_synsets": 0, "n_lemmas": 0}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
     def to_dict(self) -> Dict[str, Any]:
         """

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from haystack import component
 import spacy
 from .synonym_variation import LexicalVariator, POS_MAPPING
@@ -21,31 +21,29 @@ class WrongSenseLexicalVariator(LexicalVariator):
     def _process_token(
         self, 
         token: spacy.tokens.Token, 
-        text: str, 
-        additional_context: Optional[str]
-    ) -> str:
+        context: str
+    ) -> Dict[str, Any]:
         """
         Process a single token and return its varied form if applicable, using a different synset
         than the one predicted by WSD.
 
         :param token: The spaCy token to process
-        :param text: The original text for context
-        :param additional_context: Optional additional context
+        :param context: Context to use for word sense disambiguation.
         """
         # Get all synsets for the lemma
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets or len(synsets) == 1:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
         # Get the predicted synset from WSD
-        predicted_synset = self._disambiguate_word(token.lemma_, text, synsets, additional_context)
+        predicted_synset = self._disambiguate_word(token.lemma_, context, synsets)
         
         # Get all other synsets
         other_synsets = [s for s in synsets if s != predicted_synset]
         
         if not other_synsets:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
 
         # Randomly select a different synset
         random_synset = random.choice(other_synsets)
@@ -53,13 +51,16 @@ class WrongSenseLexicalVariator(LexicalVariator):
         
         # If no other lemmas are available, return original token
         if not lemmas:
-            return token.text_with_ws
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
             
         selected_lemma = random.choice(lemmas)
         
         try:
             inflected_form = self._get_inflected_form(selected_lemma, token.tag_)
-            return inflected_form + token.whitespace_
+            # Preserve capitalization if the original token was capitalized
+            if token.text[0].isupper():
+                inflected_form = inflected_form[0].upper() + inflected_form[1:]
+            return {"new_token": inflected_form + token.whitespace_, "n_synsets": len(synsets), "n_lemmas": len(lemmas)}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return token.text_with_ws 
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
