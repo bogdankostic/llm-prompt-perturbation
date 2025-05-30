@@ -184,7 +184,11 @@ class LexicalVariator:
         
         reply = self.wsd_model.run(messages)
         answer_text = reply["replies"][0].text
-        synset_idx = int(answer_text[0]) - 1
+        try:
+            synset_idx = int(answer_text[0]) - 1
+        except ValueError:
+            logging.warning(f"Invalid synset index {answer_text} for {len(synsets)} synsets")
+            synset_idx = 0
         
         if not 0 <= synset_idx < len(synsets):
             # Log a warning and return the first synset
