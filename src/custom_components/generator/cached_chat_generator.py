@@ -30,9 +30,9 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         :param *args: Arguments to pass to OpenAIChatGenerator
         :param **kwargs: Keyword arguments to pass to OpenAIChatGenerator
         """
-        super().__init__(*args, **kwargs)
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        super().__init__(*args, **kwargs)
     
     def _get_model_cache_dir(self) -> Path:
         """
