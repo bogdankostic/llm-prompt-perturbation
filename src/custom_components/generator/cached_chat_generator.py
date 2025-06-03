@@ -1,6 +1,7 @@
 import json
 from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
+import hashlib
 
 from haystack import component, default_to_dict
 from haystack.components.generators.chat import OpenAIChatGenerator
@@ -58,8 +59,8 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         messages_dict = [msg.to_dict() for msg in messages]
         # Convert to a string representation
         messages_str = json.dumps(messages_dict, sort_keys=True)
-        # Use a hash of the messages as the cache key
-        return str(hash(messages_str))
+        # Use SHA-256 hash of the messages as the cache key
+        return hashlib.sha256(messages_str.encode()).hexdigest()
     
     def _get_cached_response(self, cache_key: str) -> Optional[Dict[str, Any]]:
         """
@@ -127,7 +128,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         )
         
         # Cache the response
-        self._cache_response(cache_key, response)
+        self._cache_response(cache_key, response.copy())
         
         return response
     
