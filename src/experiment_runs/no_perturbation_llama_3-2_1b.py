@@ -29,9 +29,9 @@ prompt_builder = ChatPromptBuilder(
     template=chat_messages
 )
 generator = CachedOpenAIChatGenerator(
-    api_base_url="http://meta-llama-llama-3-2-1b.bdarabisahneh.svc.cluster.local:8000/v1",
+    api_base_url="http://meta-llama-llama-3-2-1b-instruct.bdarabisahneh.svc.cluster.local:8000/v1",
     cache_dir="/experiments/llm-cache",
-    model="meta-llama/Llama-3.2-1B",
+    model="meta-llama/Llama-3.2-1B-Instruct",
     api_key=Secret.from_env_var("PLACEHOLDER"),
     generation_kwargs={
         "temperature": 0,
@@ -48,7 +48,7 @@ experiment = Experiment(
     name="mmlu_llama_3_2_1b_no_perturbation",
     configs=pipeline.to_dict(),
     dataset="tasksource/mmlu",
-    model="meta-llama/Llama-3.2-1B"
+    model="meta-llama/Llama-3.2-1B-Instruct "
 )
 
 dataset_names = get_dataset_config_names("tasksource/mmlu")
