@@ -54,8 +54,10 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         :param messages: List of chat messages
         :return: A string key for caching
         """
-        # Convert messages to a string representation
-        messages_str = json.dumps([msg.to_dict() for msg in messages])
+        # Convert messages to a list of dictionaries
+        messages_dict = [msg.to_dict() for msg in messages]
+        # Convert to a string representation
+        messages_str = json.dumps(messages_dict, sort_keys=True)
         # Use a hash of the messages as the cache key
         return str(hash(messages_str))
     
@@ -70,7 +72,11 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         cache_file = model_cache_dir / f"{cache_key}.json"
         if cache_file.exists():
             with open(cache_file, "r") as f:
-                return json.load(f)
+                response = json.load(f)
+                # Convert dictionaries back to ChatMessage objects
+                if 'replies' in response:
+                    response['replies'] = [ChatMessage.from_dict(msg) for msg in response['replies']]
+                return response
         return None
     
     def _cache_response(self, cache_key: str, response: Dict[str, Any]) -> None:
@@ -80,6 +86,10 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         :param cache_key: The cache key to store under
         :param response: The response to cache
         """
+        # Convert ChatMessage objects in replies to dictionaries
+        if 'replies' in response:
+            response['replies'] = [msg.to_dict() for msg in response['replies']]
+            
         model_cache_dir = self._get_model_cache_dir()
         cache_file = model_cache_dir / f"{cache_key}.json"
         with open(cache_file, "w") as f:
