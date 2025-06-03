@@ -1,10 +1,11 @@
 import json
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 
 from haystack import component, default_to_dict
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage
+from haystack.dataclasses import ChatMessage, StreamingCallbackT
+from haystack.tools import Tool, Toolset
 
 
 @component
@@ -32,7 +33,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        super().__init__(*args, **kwargs)
+        super(CachedOpenAIChatGenerator, self).__init__(*args, **kwargs)
     
     def _get_model_cache_dir(self) -> Path:
         """
@@ -84,7 +85,16 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         with open(cache_file, "w") as f:
             json.dump(response, f)
     
-    def run(self, messages: List[ChatMessage]) -> Dict[str, Any]:
+    @component.output_types(replies=List[ChatMessage])
+    def run(
+        self,
+        messages: List[ChatMessage],
+        streaming_callback: Optional[StreamingCallbackT] = None,
+        generation_kwargs: Optional[Dict[str, Any]] = None,
+        *,
+        tools: Optional[Union[List[Tool], Toolset]] = None,
+        tools_strict: Optional[bool] = None,
+    ):
         """
         Run the chat generator with caching.
 
@@ -98,7 +108,13 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
             return cached_response
         
         # If not in cache, generate response using parent class
-        response = super().run(messages)
+        response = super(CachedOpenAIChatGenerator, self).run(
+            messages=messages,
+            streaming_callback=streaming_callback,
+            generation_kwargs=generation_kwargs,
+            tools=tools,
+            tools_strict=tools_strict
+        )
         
         # Cache the response
         self._cache_response(cache_key, response)
@@ -114,5 +130,5 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         return default_to_dict(
             self,
             cache_dir=str(self.cache_dir),
-            **super().to_dict()
+            **super(CachedOpenAIChatGenerator, self).to_dict()
         )

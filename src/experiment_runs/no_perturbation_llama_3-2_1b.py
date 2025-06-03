@@ -2,8 +2,9 @@ from collections import defaultdict
 
 from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
-from haystack.components.builders.prompt_builder import PromptBuilder
+from haystack.components.builders.chat_prompt_builder import ChatPromptBuilder
 from haystack.utils import Secret
+from haystack.dataclasses import ChatMessage
 from tqdm import tqdm
 
 from src.utils.experiment import Experiment
@@ -13,21 +14,24 @@ from src.custom_components.generator.cached_chat_generator import CachedOpenAICh
 
 answer_mapping = ["A", "B", "C", "D"]
 
-
+system_prompt = """You are a helpful assistant that can answer multiple choice questions about the world. Answer the question based on the choices provided. Only output the letter of the choice that you think is the correct answer."""
 prompt_template = """Question: {{question}}
 {% for choice in choices %}{{ ['A', 'B', 'C', 'D'][loop.index0] }}) {{choice}}
 {% endfor %}
 Answer:
 """
-system_prompt = """You are a helpful assistant that can answer multiple choice questions about the world. Answer the question based on the choices provided. Only output the letter of the choice that you think is the correct answer."""
-prompt_builder = PromptBuilder(
-    template=prompt_template
+
+chat_messages = [
+    ChatMessage.from_system(system_prompt),
+    ChatMessage.from_user(prompt_template)
+]
+prompt_builder = ChatPromptBuilder(
+    template=chat_messages
 )
 generator = CachedOpenAIChatGenerator(
     api_base_url="http://meta-llama-llama-3-2-1b.bdarabisahneh.svc.cluster.local:8000/v1",
     cache_dir="/experiments/llm-cache",
     model="meta-llama/Llama-3.2-1B",
-    system_prompt=system_prompt,
     api_key=Secret.from_env_var("PLACEHOLDER"),
     generation_kwargs={
         "temperature": 0,
