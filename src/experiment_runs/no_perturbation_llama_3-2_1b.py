@@ -24,6 +24,7 @@ prompt_builder = PromptBuilder(
     template=prompt_template
 )
 generator = CachedOpenAIChatGenerator(
+    api_base_url="http://meta-llama-llama-3-2-1b.bdarabisahneh.svc.cluster.local:8000/v1",
     cache_dir="/experiments/llm-cache",
     model="meta-llama/Llama-3.2-1B",
     system_prompt=system_prompt,
