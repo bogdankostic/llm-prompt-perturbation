@@ -63,8 +63,9 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
         predictions["dataset"].append(dataset_name)
         predictions["question"].append(sample["question"])
         predictions["answer"].append(answer_mapping[sample["answer"]])
-        predictions["prediction"].append(response["generator"]["replies"][0][0])
-        predictions["output"].append(response["generator"]["replies"][0])
+        # Use only the first character of the response as the prediction
+        predictions["prediction"].append(response["generator"]["replies"][0].text[0])
+        predictions["output"].append(response["generator"]["replies"][0].text)
 
 
 experiment.add_predictions(predictions)
