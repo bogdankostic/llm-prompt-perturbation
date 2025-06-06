@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: mmlu-lexical-wrong-sense-perturbation
+spec:
+    template:
+        metadata:
+            labels:
+                app: mmlu-lexical-wrong-sense-perturbation
+        spec:
+            restartPolicy: Never
+            imagePullSecrets:
+            - name: private-registry-auth
+            containers:
+            - name: mmlu-lexical-wrong-sense-perturbation
+            image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+            command: ["python"]
+            args: ["-u", "/llm_prompt_perturbation/src/perturbations/mmlu/lexical/wrong_sense_perturbation.py"]
+            env:
+            - name: WSD_MODEL_ENDPOINT
+              value: "http://wsd-model.bdarabisahneh.svc.cluster.local:8000"
+            - name: PLACEHOLDER
+              value: "placeholder"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            volumeMounts:
+            - name: perturbation-experiments-pvc
+              mountPath: /experiments
+        volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
