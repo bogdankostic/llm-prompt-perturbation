@@ -112,17 +112,20 @@ class LexicalVariator:
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": False}
 
         if len(synsets) == 1:
             synset = synsets[0] 
         else:
-            synset = self._disambiguate_word(token.lemma_, synsets, context)
+            synset, guided_unguided_responses_match = self._disambiguate_word(token.lemma_, synsets, context)
         lemmas = [lemma for lemma in synset.lemmas() if lemma != token.lemma_]
         
         # If no other lemmas are available, return original token
         if not lemmas:
-            return {"new_token": token.text_with_ws, "n_synsets": len(synsets), "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, 
+                    "n_synsets": len(synsets), 
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
             
         selected_lemma = random.choice(lemmas)
         
@@ -131,10 +134,16 @@ class LexicalVariator:
             # Preserve capitalization if the original token was capitalized
             if token.text[0].isupper():
                 inflected_form = inflected_form[0].upper() + inflected_form[1:]
-            return {"new_token": inflected_form + token.whitespace_, "n_synsets": len(synsets), "n_lemmas": len(lemmas)}
+            return {"new_token": inflected_form + token.whitespace_, 
+                    "n_synsets": len(synsets), 
+                    "n_lemmas": len(lemmas),
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, 
+                    "n_synsets": 0, 
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
     
     def _get_inflected_form(self, lemma: str, tag: str) -> str:
         """
@@ -171,7 +180,7 @@ class LexicalVariator:
         word: str, 
         synsets: List[wn.Synset], 
         context: str
-    ) -> wn.Synset:
+    ) -> Tuple[wn.Synset, bool]:
         """
         Select the most appropriate synset for a word based on context.
 
@@ -183,8 +192,23 @@ class LexicalVariator:
         instruction = self._build_wsd_instruction(word, synsets, context)
         messages = [ChatMessage.from_user(instruction)]
         
-        reply = self.wsd_model.run(messages)
-        answer_text = reply["replies"][0].text
+        guided_reply = self.wsd_model.run(
+            messages,
+            # Restrict the model to generate only a valid synset index
+            generation_kwargs={
+                "extra_body": {
+                    "guided_choice": [f"{idx+1}" for idx in range(len(synsets))]
+                }
+            }
+        )
+        answer_text = guided_reply["replies"][0].text
+
+        # Get model output without guidance
+        unguided_reply = self.wsd_model.run(messages)
+        unguided_answer_text = unguided_reply["replies"][0].text
+
+        guided_unguided_responses_match = unguided_answer_text[0] == answer_text[0]            
+
         try:
             synset_idx = int(answer_text[0]) - 1
         except ValueError:
@@ -196,7 +220,7 @@ class LexicalVariator:
             logging.warning(f"Invalid synset index {synset_idx} for {len(synsets)} synsets")
             synset_idx = 0
             
-        return synsets[synset_idx]
+        return synsets[synset_idx], guided_unguided_responses_match
     
     def _build_wsd_instruction(
         self, 
