@@ -79,6 +79,7 @@ class LexicalVariator:
         output_text = ""
         metadata = defaultdict(list)
         n_changed_tokens = 0
+        n_content_tokens = 0
         for token in analyzed_text:
             if token.pos_ in POS_MAPPING.keys():
                 new_token_dict = self._process_token(token, context)
@@ -87,15 +88,19 @@ class LexicalVariator:
                 metadata["n_synsets"].append(new_token_dict["n_synsets"])
                 metadata["n_lemmas"].append(new_token_dict["n_lemmas"])
                 metadata["changes"].append((token.text, new_token.strip()))
+                metadata["guided_unguided_responses_match"].append(new_token_dict["guided_unguided_responses_match"])
                 if new_token != token.text_with_ws:
                     n_changed_tokens += 1
+                n_content_tokens += 1
             else:
                 output_text += token.text_with_ws
                 metadata["n_synsets"].append(0)
                 metadata["n_lemmas"].append(0)
                 metadata["changes"].append((token.text, token.text))
+                metadata["guided_unguided_responses_match"].append("no_synsets")
 
         metadata["n_changed_tokens"] = n_changed_tokens
+        metadata["n_content_tokens"] = n_content_tokens
         return {"text": output_text, "metadata": metadata}
     
     def _process_token(
