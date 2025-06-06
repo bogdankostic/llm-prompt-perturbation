@@ -48,7 +48,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         model_cache_dir.mkdir(parents=True, exist_ok=True)
         return model_cache_dir
     
-    def _get_cache_key(self, messages: List[ChatMessage]) -> str:
+    def _get_cache_key(self, messages: List[ChatMessage], generation_kwargs: Optional[Dict[str, Any]] = None) -> str:
         """
         Generate a cache key from the messages.
 
@@ -57,6 +57,8 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         """
         # Convert messages to a list of dictionaries
         messages_dict = [msg.to_dict() for msg in messages]
+        if generation_kwargs is not None:
+            messages_dict.append({"generation_kwargs": generation_kwargs})
         # Convert to a string representation
         messages_str = json.dumps(messages_dict, sort_keys=True)
         # Use SHA-256 hash of the messages as the cache key
@@ -112,7 +114,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         :param messages: List of chat messages
         :return: The generated response
         """
-        cache_key = self._get_cache_key(messages)
+        cache_key = self._get_cache_key(messages, generation_kwargs)
         cached_response = self._get_cached_response(cache_key)
         
         if cached_response is not None:
