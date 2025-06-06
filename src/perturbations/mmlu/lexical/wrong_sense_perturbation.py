@@ -11,7 +11,7 @@ from haystack.components.builders.prompt_builder import PromptBuilder
 from haystack.utils import Secret
 from tqdm import tqdm
 
-from src.custom_components.lexical.wrong_sense_variation import LexicalVariator
+from src.custom_components.lexical.wrong_sense_variation import WrongSenseLexicalVariator
 from src.custom_components.generator.cached_chat_generator import CachedOpenAIChatGenerator
 
 
@@ -36,7 +36,7 @@ wsd_model = CachedOpenAIChatGenerator(
     }
 )
 
-lexical_variator = LexicalVariator(
+lexical_variator = WrongSenseLexicalVariator(
     wsd_model=wsd_model,
     spacy_model="en_core_web_sm",
     wordnet_version="oewn:2024",
