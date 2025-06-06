@@ -71,7 +71,7 @@ class RandomLexicalVariator(LexicalVariator):
         all_synsets = self.synset_per_pos[token.pos_]
         
         if not all_synsets:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "not applicable"}
 
         # Randomly select a synset
         random_synset = random.choice(all_synsets)
@@ -79,7 +79,7 @@ class RandomLexicalVariator(LexicalVariator):
         
         # If no lemmas are available, return original token
         if not lemmas:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "not applicable"}
             
         selected_lemma = random.choice(lemmas)
         
@@ -88,10 +88,10 @@ class RandomLexicalVariator(LexicalVariator):
             # Preserve capitalization if the original token was capitalized
             if token.text[0].isupper():
                 inflected_form = inflected_form[0].upper() + inflected_form[1:]
-            return {"new_token": inflected_form + token.whitespace_, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": inflected_form + token.whitespace_, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "not applicable"}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "not applicable"}
 
     def to_dict(self) -> Dict[str, Any]:
         """

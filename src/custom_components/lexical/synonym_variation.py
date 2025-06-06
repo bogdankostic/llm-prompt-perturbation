@@ -117,7 +117,10 @@ class LexicalVariator:
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "no_synsets"}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": "not applicable"}
 
         if len(synsets) == 1:
             synset = synsets[0]

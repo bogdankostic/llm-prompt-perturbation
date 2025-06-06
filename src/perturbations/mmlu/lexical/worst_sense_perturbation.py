@@ -28,7 +28,7 @@ Answer:
 wsd_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
     model="swap-uniba/LLM-wsd-FT-ALL",
-    cache_dir="/experiments/llm-cache",
+    cache_dir="experiments/llm-cache",
     api_base_url=f"{os.environ['WSD_MODEL_ENDPOINT']}/v1",
     generation_kwargs={
         "temperature": 0,

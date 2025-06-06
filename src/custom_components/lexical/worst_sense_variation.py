@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 from haystack import component
 import spacy
-from .synonym_variation import LexicalVariator, POS_MAPPING
+from src.custom_components.lexical.synonym_variation import LexicalVariator, POS_MAPPING
 import random
 
 
@@ -33,20 +33,26 @@ class WorstSenseLexicalVariator(LexicalVariator):
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets or len(synsets) == 1:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": "not applicable"}
 
         # Get the best predicted synset and remove it
         while len(synsets) > 1:
             best_synset, _ = self._disambiguate_word(token.lemma_, synsets, context)
-            remaining_synsets = [s for s in synsets if s != best_synset]
+            synsets = [s for s in synsets if s != best_synset]
         
         # Randomly select one of the remaining synsets
-        selected_synset = random.choice(remaining_synsets)
+        selected_synset = random.choice(synsets)
         lemmas = [lemma for lemma in selected_synset.lemmas() if lemma != token.lemma_]
         
         # If no other lemmas are available, return original token
         if not lemmas:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": "not applicable"}
             
         selected_lemma = random.choice(lemmas)
         
@@ -55,7 +61,13 @@ class WorstSenseLexicalVariator(LexicalVariator):
             # Preserve capitalization if the original token was capitalized
             if token.text[0].isupper():
                 inflected_form = inflected_form[0].upper() + inflected_form[1:]
-            return {"new_token": inflected_form + token.whitespace_, "n_synsets": len(synsets), "n_lemmas": len(lemmas)}
+            return {"new_token": inflected_form + token.whitespace_, 
+                    "n_synsets": len(synsets),
+                    "n_lemmas": len(lemmas),
+                    "guided_unguided_responses_match": "not applicable"}
         except Exception as e:
             # Fallback to original token if inflection fails
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0}
+            return {"new_token": token.text_with_ws, 
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": "not applicable"}

@@ -34,7 +34,10 @@ class WrongSenseLexicalVariator(LexicalVariator):
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets or len(synsets) == 1:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "no_synsets"}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": "not applicable"}
 
         # Get the best predicted synset and remove it
         best_synset, guided_unguided_responses_match = self._disambiguate_word(token.lemma_, synsets, context)
@@ -46,7 +49,10 @@ class WrongSenseLexicalVariator(LexicalVariator):
         
         # If no other lemmas are available, return original token
         if not lemmas:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": guided_unguided_responses_match}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
             
         selected_lemma = random.choice(lemmas)
         
@@ -55,7 +61,14 @@ class WrongSenseLexicalVariator(LexicalVariator):
             # Preserve capitalization if the original token was capitalized
             if token.text[0].isupper():
                 inflected_form = inflected_form[0].upper() + inflected_form[1:]
-            return {"new_token": inflected_form + token.whitespace_, "n_synsets": len(synsets), "n_lemmas": len(lemmas), "guided_unguided_responses_match": guided_unguided_responses_match}
+            return {"new_token": inflected_form + token.whitespace_,
+                    "n_synsets": len(synsets),
+                    "n_lemmas": len(lemmas),
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
+        
         except Exception as e:
             # Fallback to original token if inflection fails
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": guided_unguided_responses_match}
+            return {"new_token": token.text_with_ws,
+                    "n_synsets": 0,
+                    "n_lemmas": 0,
+                    "guided_unguided_responses_match": guided_unguided_responses_match}
