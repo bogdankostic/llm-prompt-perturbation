@@ -112,10 +112,11 @@ class LexicalVariator:
         synsets = self.wordnet.synsets(token.lemma_, pos=POS_MAPPING[token.pos_])
         
         if not synsets:
-            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": False}
+            return {"new_token": token.text_with_ws, "n_synsets": 0, "n_lemmas": 0, "guided_unguided_responses_match": "no_synsets"}
 
         if len(synsets) == 1:
-            synset = synsets[0] 
+            synset = synsets[0]
+            guided_unguided_responses_match = "single_synset"  # Only one option available
         else:
             synset, guided_unguided_responses_match = self._disambiguate_word(token.lemma_, synsets, context)
         lemmas = [lemma for lemma in synset.lemmas() if lemma != token.lemma_]
@@ -180,7 +181,7 @@ class LexicalVariator:
         word: str, 
         synsets: List[wn.Synset], 
         context: str
-    ) -> Tuple[wn.Synset, bool]:
+    ) -> Tuple[wn.Synset, str]:
         """
         Select the most appropriate synset for a word based on context.
 
@@ -207,7 +208,7 @@ class LexicalVariator:
         unguided_reply = self.wsd_model.run(messages)
         unguided_answer_text = unguided_reply["replies"][0].text
 
-        guided_unguided_responses_match = unguided_answer_text[0] == answer_text[0]            
+        guided_unguided_responses_match = "matched" if unguided_answer_text[0] == answer_text[0] else "mismatched"            
 
         try:
             synset_idx = int(answer_text[0]) - 1
