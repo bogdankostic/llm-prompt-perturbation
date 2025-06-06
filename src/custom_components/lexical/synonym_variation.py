@@ -4,11 +4,12 @@ import random
 from typing import List, Optional, Dict, Any, Tuple
 
 from haystack import component, default_to_dict
-from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage
 import spacy
 from lemminflect import getInflection
 import wn
+
+from src.custom_components.generator.cached_chat_generator import CachedOpenAIChatGenerator
 
 # Constants for POS mapping and supported POS tags
 POS_MAPPING: Dict[str, str] = {
@@ -29,7 +30,7 @@ class LexicalVariator:
     
     def __init__(
         self,
-        wsd_model: OpenAIChatGenerator,
+        wsd_model: CachedOpenAIChatGenerator,
         spacy_model: str = "en_core_web_sm",
         wordnet_version: str = "oewn:2024",
         random_seed: Optional[int] = None,
