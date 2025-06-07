@@ -74,12 +74,20 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         model_cache_dir = self._get_model_cache_dir()
         cache_file = model_cache_dir / f"{cache_key}.json"
         if cache_file.exists():
-            with open(cache_file, "r") as f:
-                response = json.load(f)
-                # Convert dictionaries back to ChatMessage objects
-                if 'replies' in response:
-                    response['replies'] = [ChatMessage.from_dict(msg) for msg in response['replies']]
-                return response
+            try:
+                with open(cache_file, "r") as f:
+                    content = f.read()
+                    if not content:  # Handle empty file
+                        return None
+                    response = json.loads(content)
+                    # Convert dictionaries back to ChatMessage objects
+                    if 'replies' in response:
+                        response['replies'] = [ChatMessage.from_dict(msg) for msg in response['replies']]
+                    return response
+            except json.JSONDecodeError:
+                # If the file contains invalid JSON, delete it and return None
+                cache_file.unlink()
+                return None
         return None
     
     def _cache_response(self, cache_key: str, response: Dict[str, Any]) -> None:
