@@ -245,7 +245,7 @@ class LexicalVariator:
         :param synsets: List of possible synsets
         :param context: Context to use for word sense disambiguation.
         """
-        instruction = f"Given the word \"{word}\" in the input sentence, choose the correct meaning for the following:\n"
+        instruction = f"Given the word \"{word}\" in the input sentence, choose the correct meaning from the following:\n"
         for idx, synset in enumerate(synsets):
             instruction += f"{idx+1}) {synset.definition()}\n"
         instruction += f"\nGenerate only the number of the selected option. Input: \"{context}"
