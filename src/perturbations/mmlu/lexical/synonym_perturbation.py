@@ -100,7 +100,7 @@ output = {
     "data": perturbed_data_df.to_dict(orient="records")
 }
 
-output_path = "/experiments/data/mmlu/lexical/synonym_perturbation.json"
+output_path = "/experiments/data/mmlu/lexical/synonym_perturbation_2.json"
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(output, f)

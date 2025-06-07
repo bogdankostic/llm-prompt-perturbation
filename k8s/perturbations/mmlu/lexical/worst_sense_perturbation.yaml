@@ -1,18 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mmlu-lexical-worst-sense-perturbation
+  name: mmlu-lexical-worst-sense-perturbation-2
 spec:
   template:
     metadata:
       labels:
-        app: mmlu-lexical-worst-sense-perturbation
+        app: mmlu-lexical-worst-sense-perturbation-2
     spec:
       restartPolicy: Never
       imagePullSecrets:
       - name: private-registry-auth
       containers:
-      - name: mmlu-lexical-worst-sense-perturbation
+      - name: mmlu-lexical-worst-sense-perturbation-2
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
         command: ["python"]
         args: ["-u", "/llm_prompt_perturbation/src/perturbations/mmlu/lexical/worst_sense_perturbation.py"]
