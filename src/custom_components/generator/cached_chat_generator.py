@@ -100,7 +100,15 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         # Convert ChatMessage objects in replies to dictionaries
         if 'replies' in response:
             response['replies'] = [msg.to_dict() for msg in response['replies']]
-            
+
+        # CompletionTokensDetails and PromptTokensDetails are not serializable and not needed for caching
+        for reply in response['replies']:
+            if 'meta' in reply and 'usage' in reply['meta']:
+                if 'completion_tokens_details' in reply['meta']['usage']:
+                    del reply['meta']['usage']['completion_tokens_details']
+                if 'prompt_tokens_details' in reply['meta']['usage']:
+                    del reply['meta']['usage']['prompt_tokens_details']
+
         model_cache_dir = self._get_model_cache_dir()
         cache_file = model_cache_dir / f"{cache_key}.json"
         with open(cache_file, "w") as f:

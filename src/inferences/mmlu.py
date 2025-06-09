@@ -75,7 +75,7 @@ def main():
 
     # Run inference on LLM
     predictions = defaultdict(list)
-    for _, item in tqdm(data_df.iterrows(), desc="Sample"):
+    for _, item in tqdm(data_df.iterrows(), desc="Sample", total=len(data_df)):
         response = pipeline.run({
             "question": item["question"],
             "choices": item["choices"]
