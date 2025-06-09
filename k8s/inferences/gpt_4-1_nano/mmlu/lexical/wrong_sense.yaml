@@ -1,29 +1,32 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mmlu-gpt4-1-nano-random-perturbation
+  name: gpt-4-1-nano-mmlu-lexical-wrong-sense
 spec:
   template:
     metadata:
       labels:
-        app: mmlu-gpt4-1-nano-random-perturbation
+        app: gpt-4-1-nano-mmlu-lexical-wrong-sense
     spec:
       restartPolicy: Never
       imagePullSecrets:
       - name: private-registry-auth
       containers:
-      - name: mmlu-gpt4-1-nano-random-perturbation
+      - name: gpt-4-1-nano-mmlu-lexical-wrong-sense
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
-        command: ["python"]
-        args: ["-u", "/llm_prompt_perturbation/src/experiment_runs/mmlu/lexical/random_perturbation.py"]
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/lexical/wrong_sense_perturbation.json",
+          "--perturbation-type", "lexical-wrong-sense",
+          "--model", "gpt-4.1-nano-2025-04-14",
+          "--output", "/experiments/gpt_4-1_nano/mmlu/lexical/wrong_sense.json"
+        ]
         env:
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
               name: openai-api-key
               key: api-key
-        - name: PLACEHOLDER
-          value: "placeholder"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

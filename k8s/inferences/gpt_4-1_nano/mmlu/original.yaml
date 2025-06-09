@@ -1,31 +1,32 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mmlu-gpt4-1-nano-synonym-perturbation
+  name: gpt-4-1-nano-mmlu-original
 spec:
   template:
     metadata:
       labels:
-        app: mmlu-gpt4-1-nano-synonym-perturbation
+        app: gpt-4-1-nano-mmlu-original
     spec:
       restartPolicy: Never
       imagePullSecrets:
       - name: private-registry-auth
       containers:
-      - name: mmlu-gpt4-1-nano-synonym-perturbation
+      - name: gpt-4-1-nano-mmlu-original
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
-        command: ["python"]
-        args: ["-u", "/llm_prompt_perturbation/src/experiment_runs/mmlu/lexical/synonym_perturbation.py"]
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/original.json",
+          "--perturbation-type", "none",
+          "--model", "gpt-4.1-nano-2025-04-14",
+          "--output", "/experiments/gpt_4-1_nano/mmlu/original.json"
+        ]
         env:
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
               name: openai-api-key
               key: api-key
-        - name: PLACEHOLDER
-          value: "placeholder"
-        - name: WSD_MODEL_ENDPOINT
-          value: "http://wsd-model.bdarabisahneh.svc.cluster.local:8000"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:
