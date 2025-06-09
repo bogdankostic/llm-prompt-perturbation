@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: meta-llama-llama-3-2-1b-instruct
+  name: meta-llama-llama-3-2-3b-instruct
   namespace: bdarabisahneh
   labels:
-    app: meta-llama-llama-3-2-1b-instruct
+    app: meta-llama-llama-3-2-3b-instruct
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: meta-llama-llama-3-2-1b-instruct
+      app: meta-llama-llama-3-2-3b-instruct
   template:
     metadata:
       labels:
-        app: meta-llama-llama-3-2-1b-instruct
+        app: meta-llama-llama-3-2-3b-instruct
     spec:
       volumes:
       - name: cache-volume
@@ -27,11 +27,11 @@ spec:
       nodeSelector:
         gpu: a100
       containers:
-      - name: meta-llama-llama-3-2-1b-instruct
+      - name: meta-llama-llama-3-2-3b-instruct
         image: vllm/vllm-openai:latest
         command: ["/bin/sh", "-c"]
         args: [
-          "vllm serve meta-llama/Llama-3.2-1B-Instruct --trust-remote-code --enable-chunked-prefill --max_num_batched_tokens 1024"
+          "vllm serve meta-llama/Llama-3.2-3B-Instruct --trust-remote-code --enable-chunked-prefill --max_num_batched_tokens 1024 --max_model_len 4096"
         ]
         env:
         - name: HUGGING_FACE_HUB_TOKEN

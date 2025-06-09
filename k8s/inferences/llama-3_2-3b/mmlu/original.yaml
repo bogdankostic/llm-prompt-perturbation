@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: llama-3-2-3b-mmlu-original
+spec:
+  template:
+    metadata:
+      labels:
+        app: llama-3-2-3b-mmlu-original
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: llama-3-2-3b-mmlu-original
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/original.json",
+          "--perturbation-type", "none",
+          "--model", "meta-llama/Llama-3.2-3B-Instruct",
+          "--output", "/experiments/llama-3_2-3b/mmlu/original.json",
+          "--api-base-url", "http://meta-llama-llama-3-2-3b-instruct.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
