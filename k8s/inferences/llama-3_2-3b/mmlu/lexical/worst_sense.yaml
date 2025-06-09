@@ -27,6 +27,8 @@ spec:
           value: "placeholder"
         - name: PYTHONUNBUFFERED
           value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "150"
         volumeMounts:
         - name: perturbation-experiments-pvc
           mountPath: /experiments
