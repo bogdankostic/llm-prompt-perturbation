@@ -2,13 +2,10 @@ import argparse
 import json
 from collections import defaultdict
 
-from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
 from haystack.components.builders.chat_prompt_builder import ChatPromptBuilder
 from haystack.utils import Secret
 from haystack.dataclasses import ChatMessage
-from tqdm import tqdm
-import pandas as pd
 
 from src.utils.experiment import Experiment
 from src.utils.metrics import exact_match
@@ -43,8 +40,6 @@ def main():
     with open(data_path, "r") as f:
         data = json.load(f)
 
-    data_df = pd.DataFrame(data["data"])
-
     # Create pipeline components
     prompt_builder = ChatPromptBuilder(template=chat_messages)
     generator = CachedOpenAIChatGenerator(
@@ -75,7 +70,9 @@ def main():
 
     # Run inference on LLM
     predictions = defaultdict(list)
-    for _, item in tqdm(data_df.iterrows(), desc="Sample", total=len(data_df)):
+    total_samples = len(data["data"])
+    for idx, item in enumerate(data["data"]):
+        print(f"Processing sample {idx + 1}/{total_samples}")
         response = pipeline.run({
             "question": item["question"],
             "choices": item["choices"]
