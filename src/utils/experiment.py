@@ -16,11 +16,13 @@ class Experiment:
         configs: Dict[str, Any],
         dataset: str,
         model: str,
+        perturbation_type: str,
     ):
         self.name = name
         self.configs = configs
         self.dataset = dataset
         self.model = model
+        self.perturbation_type = perturbation_type
         self.time = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
         self.predictions = {}
@@ -37,6 +39,7 @@ class Experiment:
             "name": self.name,
             "dataset": self.dataset,
             "model": self.model,
+            "perturbation_type": self.perturbation_type,
             "configs": self.configs,
             "time": self.time,
             "commit_hash": self.commit_hash,
