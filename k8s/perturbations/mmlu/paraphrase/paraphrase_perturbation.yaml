@@ -18,7 +18,7 @@ spec:
         args: ["-u", "/llm_prompt_perturbation/src/perturbations/mmlu/paraphrase/paraphrase_perturbation.py"]
         env:
         - name: LLM_MODEL_ENDPOINT
-          value: "http://meta-llama-llama-3-2-3b-instruct.bdarabisahneh.svc.cluster.local:8000"
+          value: "http://meta-llama-llama-3-1-8b-instruct.bdarabisahneh.svc.cluster.local:8000"
         - name: PLACEHOLDER
           value: "placeholder"
         - name: PYTHONUNBUFFERED
