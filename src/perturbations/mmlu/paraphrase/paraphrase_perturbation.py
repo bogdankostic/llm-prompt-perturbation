@@ -79,7 +79,14 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
             }
         })
 
-        response_dict = json.loads(response["paraphrase_model"]["replies"][0].text)
+        try:
+            response_dict = json.loads(response["paraphrase_model"]["replies"][0].text)
+        except json.JSONDecodeError:
+            print(f"Error parsing JSON for sample {sample['question']}")
+            response_dict = {
+                "question": sample["question"],
+                "choices": sample["choices"]
+            }
         question = response_dict["question"]
         choices = response_dict["choices"]
         for idx, choice in enumerate(choices):
