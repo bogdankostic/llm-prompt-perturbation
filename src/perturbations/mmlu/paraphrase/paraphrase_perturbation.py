@@ -47,7 +47,7 @@ prompt_builder = ChatPromptBuilder(
 )
 paraphrase_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
-    model="meta-llama/Llama-3.2-3B-Instruct",
+    model="meta-llama/Llama-3.1-8B-Instruct",
     cache_dir="/experiments/llm-cache",
     api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
     generation_kwargs={
