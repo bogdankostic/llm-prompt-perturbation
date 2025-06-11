@@ -45,7 +45,7 @@ prompt_builder = ChatPromptBuilder(
 paraphrase_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
     model="meta-llama/Llama-3.2-3B-Instruct",
-    cache_dir="tmp/llm-cache",
+    cache_dir="/experiments/llm-cache",
     api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
     generation_kwargs={
         "temperature": 0,
@@ -66,6 +66,7 @@ perturbation_pipeline.connect("prompt_builder.prompt", "paraphrase_model.message
 perturbed_data = defaultdict(list)
 dataset_names = get_dataset_config_names("tasksource/mmlu")
 for dataset_name in tqdm(dataset_names, desc="Dataset", file=sys.stdout, dynamic_ncols=False, ncols=80):
+    print(f"Processing dataset: {dataset_name}")
     data = load_dataset("tasksource/mmlu", name=dataset_name, split="test")
     for sample in tqdm(data, desc="Sample", file=sys.stdout, dynamic_ncols=False, ncols=80):
         response = perturbation_pipeline.run({

@@ -23,6 +23,8 @@ spec:
           value: "placeholder"
         - name: PYTHONUNBUFFERED
           value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "150"
         - name: HF_HOME
           value: "/experiments/huggingface"
         volumeMounts:
