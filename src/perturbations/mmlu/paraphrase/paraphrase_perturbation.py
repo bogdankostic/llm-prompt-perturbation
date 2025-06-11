@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import subprocess
 import json
+import sys
 from typing import List
 
 import pandas as pd
@@ -64,9 +65,9 @@ perturbation_pipeline.connect("prompt_builder.prompt", "paraphrase_model.message
 # Perturb dataset
 perturbed_data = defaultdict(list)
 dataset_names = get_dataset_config_names("tasksource/mmlu")
-for dataset_name in tqdm(dataset_names, desc="Dataset"):
+for dataset_name in tqdm(dataset_names, desc="Dataset", file=sys.stdout, dynamic_ncols=False, ncols=80):
     data = load_dataset("tasksource/mmlu", name=dataset_name, split="test")
-    for sample in tqdm(data, desc="Sample"):
+    for sample in tqdm(data, desc="Sample", file=sys.stdout, dynamic_ncols=False, ncols=80):
         response = perturbation_pipeline.run({
             "prompt_builder": {
                 "question": sample["question"],
