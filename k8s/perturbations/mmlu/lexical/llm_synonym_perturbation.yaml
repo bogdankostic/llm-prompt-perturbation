@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mmlu-lexical-llm-synonym-perturbation
+spec:
+  template:
+    metadata:
+      labels:
+        app: mmlu-lexical-llm-synonym-perturbation
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: mmlu-lexical-llm-synonym-perturbation
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python"]
+        args: ["-u", "/llm_prompt_perturbation/src/perturbations/mmlu/lexical/llm_synonym_perturbation.py"]
+        env:
+        - name: LLM_MODEL_ENDPOINT
+          value: "http://gemma-3-27b-it.bdarabisahneh.svc.cluster.local:8000"
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "150"
+        - name: HF_HOME
+          value: "/experiments/huggingface"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+      - name: perturbation-experiments-pvc
+        persistentVolumeClaim:
+          claimName: perturbation-experiments-pvc

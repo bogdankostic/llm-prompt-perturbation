@@ -30,14 +30,15 @@ answer_mapping = ["A", "B", "C", "D"]
 
 # Construct perturbation pipeline
 prompt_template = [ChatMessage.from_user("""You are given a multiple-choice question.
-Create a version of the question and the answer choices where you exchange words by their synonyms, the rest should be kept the same, especially the meaning.
-Output also a list of tuples containing the original word and the new word. The list should contain an entry for each word, so also for unchanged words.
-
+Create a version of the question and the answer choices where you exchange words by their synonyms, if possible. The rest should be kept the same, especially the meaning. The language should stay natural. The selected synonyms should respect the terminology of the question's domain. If a synonym is not possible, keep the original word.
+Also output a list of tuples, where each tuple contains the original word and its corresponding new word. The list must include EVERY word in the original text in order, even if the same word appears multiple times. Include unchanged words as well as stop words and other non-content words, for example ["the", "the"] or ["for", "for"].
+                                         
 The output should be a valid JSON object with the following fields:
 - question: str  # The question with synonyms
 - choices: List[str]  # The answer choices with synonyms
-- changes: List[Tuple[str, str]]  # The list of tuples containing the original word and the new word
+- changes: List[Tuple[str, str]]  # The list of tuples containing all original words and new words
 
+Domain: {{domain}}
 Question: {{question}}
 {% for choice in choices %}{{ ['A', 'B', 'C', 'D'][loop.index0] }}) {{choice}}
 {% endfor %}
@@ -47,21 +48,15 @@ prompt_builder = ChatPromptBuilder(
     template=prompt_template
 )
 paraphrase_model = CachedOpenAIChatGenerator(
-    api_key=Secret.from_env_var("OPENAI_API_KEY"),
-    #model="meta-llama/Llama-3.1-8B-Instruct",
-    model="gpt-4.1-nano-2025-04-14",
-    cache_dir="tmp/llm-cache",
-    #api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
-    #api_base_url="http://localhost:8000/v1",
+    api_key=Secret.from_env_var("PLACEHOLDER"),
+    model="google/gemma-3-27b-it",
+    cache_dir="/experiments/llm-cache",
+    api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
     generation_kwargs={
         "temperature": 0,
         "seed": 77,
-        "text": {
-            "format": {
-                "type": "json_schema",
-                "name": "MultipleChoiceQuestion",
-                "schema": json_schema
-            }
+        "extra_body": {
+            "guided_json": json_schema
         }
     }
 )
@@ -82,7 +77,8 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
         response = perturbation_pipeline.run({
             "prompt_builder": {
                 "question": sample["question"],
-                "choices": sample["choices"]
+                "choices": sample["choices"],
+                "domain": dataset_name
             }
         })
 
