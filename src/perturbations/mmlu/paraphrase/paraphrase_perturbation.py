@@ -3,7 +3,6 @@ from datetime import datetime
 import os
 import subprocess
 import json
-import sys
 from typing import List
 
 import pandas as pd
@@ -96,7 +95,7 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
         perturbed_data["question"].append(question)
         perturbed_data["choices"].append(choices)
         perturbed_data["answer"].append(answer)
-        perturbed_data["dataset_name"].append(dataset_name)
+        perturbed_data["dataset"].append(dataset_name)
 
 # Save perturbed data
 perturbed_data_df = pd.DataFrame(perturbed_data)

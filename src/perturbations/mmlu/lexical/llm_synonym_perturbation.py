@@ -103,7 +103,7 @@ for dataset_name in tqdm(dataset_names, desc="Dataset"):
         perturbed_data["choices"].append(choices)
         perturbed_data["changes"].append(changes)
         perturbed_data["answer"].append(answer)
-        perturbed_data["dataset_name"].append(dataset_name)
+        perturbed_data["dataset"].append(dataset_name)
 
 # Save perturbed data
 perturbed_data_df = pd.DataFrame(perturbed_data)

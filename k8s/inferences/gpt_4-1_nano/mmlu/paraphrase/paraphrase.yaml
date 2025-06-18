@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gpt-4-1-nano-mmlu-paraphrase
+spec:
+  template:
+    metadata:
+      labels:
+        app: gpt-4-1-nano-mmlu-paraphrase
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gpt-4-1-nano-mmlu-paraphrase
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/paraphrase/paraphrase_perturbation.json",
+          "--perturbation-type", "paraphrase",
+          "--model", "gpt-4.1-nano-2025-04-14",
+          "--output", "/experiments/gpt_4-1_nano/mmlu/paraphrase/paraphrase.json"
+        ]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
