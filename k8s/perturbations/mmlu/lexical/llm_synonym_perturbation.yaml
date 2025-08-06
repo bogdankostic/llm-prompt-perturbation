@@ -18,7 +18,7 @@ spec:
         args: ["-u", "/llm_prompt_perturbation/src/perturbations/mmlu/lexical/llm_synonym_perturbation.py"]
         env:
         - name: LLM_MODEL_ENDPOINT
-          value: "http://gemma-3-27b-it.bdarabisahneh.svc.cluster.local:8000"
+          value: "http://llama-3-3-70b.bdarabisahneh.svc.cluster.local:8000"
         - name: PLACEHOLDER
           value: "placeholder"
         - name: PYTHONUNBUFFERED

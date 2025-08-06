@@ -3,7 +3,6 @@ from datetime import datetime
 import os
 import subprocess
 import json
-import sys
 from typing import List, Tuple
 
 import pandas as pd
@@ -49,7 +48,7 @@ prompt_builder = ChatPromptBuilder(
 )
 paraphrase_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
-    model="google/gemma-3-27b-it",
+    model="RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8",
     cache_dir="/experiments/llm-cache",
     api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
     generation_kwargs={
@@ -116,7 +115,7 @@ output = {
     "data": perturbed_data_df.to_dict(orient="records")
 }
 
-output_path = "/experiments/data/mmlu/lexical/llm_synonym_perturbation.json"
+output_path = "/experiments/data/mmlu/lexical/llm_synonym_perturbation_v2.json"
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(output, f)
