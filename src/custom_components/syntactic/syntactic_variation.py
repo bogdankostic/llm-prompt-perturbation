@@ -56,7 +56,11 @@ class SyntacticVariator:
         spacy_model: str = "en_core_web_trf",
         random_seed: Optional[int] = None,
     ):
-        self.spacy_model = spacy.load(spacy_model)
+        try:
+            self.spacy_model = spacy.load(spacy_model)
+        except OSError:
+            spacy.cli.download(spacy_model)
+            self.spacy_model = spacy.load(spacy_model)
         self.transformation_model = transformation_model
         self.prompt_builder = ChatPromptBuilder()
         self.spacy_model_name = spacy_model
