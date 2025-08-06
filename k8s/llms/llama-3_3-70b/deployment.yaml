@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-3-3-70b
+  namespace: bdarabisahneh
+  labels:
+    app: llama-3-3-70b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama-3-3-70b
+  template:
+    metadata:
+      labels:
+        app: llama-3-3-70b
+    spec:
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: vllm-cache
+        # vLLM needs to access the host's shared memory for tensor parallel inference.
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: "2Gi"
+      nodeSelector:
+        gpu: a100
+      containers:
+        - name: llama-3-3-70b
+          image: vllm/vllm-openai:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            [
+              "vllm serve RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8 --trust-remote-code --enable-chunked-prefill --gpu-memory-utilization 0.95 --tensor-parallel-size 2 --max_num_batched_tokens 1024 --max_model_len 4096",
+            ]
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hugging-face-hub-token
+                  key: token
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "10"
+              memory: 20G
+              nvidia.com/gpu: "2"
+            requests:
+              cpu: "2"
+              memory: 6G
+              nvidia.com/gpu: "2"
+          volumeMounts:
+            - mountPath: /root/.cache/huggingface
+              name: cache-volume
+            - name: shm
+              mountPath: /dev/shm
