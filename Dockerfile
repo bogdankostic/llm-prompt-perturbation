@@ -17,6 +17,7 @@ COPY src/ src/
 
 # Install dependencies
 RUN pip install --no-cache-dir -e .
+RUN python -m spacy download en_core_web_trf
 
 # SSH Server
 EXPOSE 22
