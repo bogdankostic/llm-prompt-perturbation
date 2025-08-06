@@ -15,7 +15,7 @@ dependencies = [
     "haystack-ai",
     "tqdm",
     "wn",
-    "spacy",
+    "spacy[transformers]",
     "lemminflect",
     "tiktoken",
     "blobfile",
