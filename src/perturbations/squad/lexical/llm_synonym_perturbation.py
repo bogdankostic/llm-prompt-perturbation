@@ -68,7 +68,7 @@ perturbation_pipeline.connect("prompt_builder.prompt", "paraphrase_model.message
 
 # Perturb dataset
 perturbed_data = defaultdict(list)
-data = load_dataset("rajpurkar/squad", split="validation").shuffle(seed=42).select(range(1000))
+data = load_dataset("rajpurkar/squad", split="validation").shuffle(seed=77).select(range(1000))
 for sample in tqdm(data, desc="Sample"):
     answer_strings = list(set(sample["answers"]["text"]))
     response = perturbation_pipeline.run({
