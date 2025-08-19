@@ -46,7 +46,7 @@ prompt_builder = ChatPromptBuilder(
 )
 paraphrase_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
-    model="google/gemma-3-27b-it",
+    model="RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8",
     cache_dir="/experiments/llm-cache",
     api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
     timeout=300,
@@ -68,7 +68,7 @@ perturbation_pipeline.connect("prompt_builder.prompt", "paraphrase_model.message
 
 # Perturb dataset
 perturbed_data = defaultdict(list)
-data = load_dataset("rajpurkar/squad", split="validation")
+data = load_dataset("rajpurkar/squad", split="validation").shuffle(seed=42).select(range(1000))
 for sample in tqdm(data, desc="Sample"):
     answer_strings = list(set(sample["answers"]["text"]))
     response = perturbation_pipeline.run({

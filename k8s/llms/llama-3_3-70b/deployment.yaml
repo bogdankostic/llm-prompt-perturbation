@@ -32,7 +32,7 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             [
-              "vllm serve RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8 --trust-remote-code --enable-chunked-prefill --gpu-memory-utilization 0.95 --tensor-parallel-size 2 --max_num_batched_tokens 1024 --max_model_len 4096",
+              "vllm serve RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8 --trust-remote-code --enable-chunked-prefill --gpu-memory-utilization 0.95 --tensor-parallel-size 2 --max_num_batched_tokens 1024 --max_model_len 8192",
             ]
           env:
             - name: HUGGING_FACE_HUB_TOKEN
