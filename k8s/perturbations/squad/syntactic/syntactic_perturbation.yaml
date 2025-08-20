@@ -1,21 +1,21 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: squad-lexical-llm-synonym-perturbation
+  name: squad-syntactic-perturbation
 spec:
   template:
     metadata:
       labels:
-        app: squad-lexical-llm-synonym-perturbation
+        app: squad-syntactic-perturbation
     spec:
       restartPolicy: Never
       imagePullSecrets:
       - name: private-registry-auth
       containers:
-      - name: squad-lexical-llm-synonym-perturbation
+      - name: squad-syntactic-perturbation
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
         command: ["python"]
-        args: ["-u", "/llm_prompt_perturbation/src/perturbations/squad/lexical/llm_synonym_perturbation.py"]
+        args: ["-u", "/llm_prompt_perturbation/src/perturbations/squad/syntactic/syntactic_perturbation.py"]
         env:
         - name: LLM_MODEL_ENDPOINT
           value: "http://llama-3-3-70b.bdarabisahneh.svc.cluster.local:8000"
