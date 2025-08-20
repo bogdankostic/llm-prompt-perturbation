@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Optional, Union
 from pathlib import Path
 import hashlib
 
@@ -48,7 +48,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         model_cache_dir.mkdir(parents=True, exist_ok=True)
         return model_cache_dir
     
-    def _get_cache_key(self, messages: List[ChatMessage], generation_kwargs: Optional[Dict[str, Any]] = None) -> str:
+    def _get_cache_key(self, messages: list[ChatMessage], generation_kwargs: Optional[dict[str, Any]] = None) -> str:
         """
         Generate a cache key from the messages.
 
@@ -64,7 +64,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         # Use SHA-256 hash of the messages as the cache key
         return hashlib.sha256(messages_str.encode()).hexdigest()
     
-    def _get_cached_response(self, cache_key: str) -> Optional[Dict[str, Any]]:
+    def _get_cached_response(self, cache_key: str) -> Optional[dict[str, Any]]:
         """
         Retrieve a cached response if it exists.
 
@@ -90,7 +90,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
                 return None
         return None
     
-    def _cache_response(self, cache_key: str, response: Dict[str, Any]) -> None:
+    def _cache_response(self, cache_key: str, response: dict[str, Any]) -> None:
         """
         Cache a response.
 
@@ -114,14 +114,14 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         with open(cache_file, "w") as f:
             json.dump(response, f)
     
-    @component.output_types(replies=List[ChatMessage])
+    @component.output_types(replies=list[ChatMessage])
     def run(
         self,
-        messages: List[ChatMessage],
+        messages: list[ChatMessage],
         streaming_callback: Optional[StreamingCallbackT] = None,
-        generation_kwargs: Optional[Dict[str, Any]] = None,
+        generation_kwargs: Optional[dict[str, Any]] = None,
         *,
-        tools: Optional[Union[List[Tool], Toolset]] = None,
+        tools: Optional[Union[list[Tool], Toolset]] = None,
         tools_strict: Optional[bool] = None,
     ):
         """
@@ -150,7 +150,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         
         return response
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the component's configuration to a dictionary.
 
