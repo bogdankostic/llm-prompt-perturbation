@@ -19,7 +19,7 @@ transformation_model = CachedOpenAIChatGenerator(
     api_key=Secret.from_env_var("PLACEHOLDER"),
     model="RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8",
     cache_dir="/experiments/llm-cache",
-    api_base_url=f"{os.environ['LLM_MODEL_ENDPOINT']}/v1",
+    api_base_url=f"{os.environ.get('LLM_MODEL_ENDPOINT', 'http://localhost:8000')}/v1",
     generation_kwargs={
         "temperature": 0,
         "seed": 77,

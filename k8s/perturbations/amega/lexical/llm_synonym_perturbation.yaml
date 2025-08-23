@@ -1,23 +1,21 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: squad-syntactic-perturbation
+  name: amega-lexical-llm-synonym-perturbation
 spec:
   template:
     metadata:
       labels:
-        app: squad-syntactic-perturbation
+        app: amega-lexical-llm-synonym-perturbation
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: cl-worker21
       restartPolicy: Never
       imagePullSecrets:
       - name: private-registry-auth
       containers:
-      - name: squad-syntactic-perturbation
+      - name: amega-lexical-llm-synonym-perturbation
         image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
         command: ["python"]
-        args: ["-u", "/llm_prompt_perturbation/src/perturbations/squad/syntactic/syntactic_perturbation.py"]
+        args: ["-u", "/llm_prompt_perturbation/src/perturbations/amega/lexical/llm_synonym_perturbation.py"]
         env:
         - name: LLM_MODEL_ENDPOINT
           value: "http://llama-3-3-70b.bdarabisahneh.svc.cluster.local:8000"
@@ -26,7 +24,7 @@ spec:
         - name: PYTHONUNBUFFERED
           value: "1"
         - name: OPENAI_TIMEOUT
-          value: "600"
+          value: "150"
         - name: HF_HOME
           value: "/experiments/huggingface"
         volumeMounts:
