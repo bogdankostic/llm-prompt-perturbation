@@ -6,7 +6,6 @@ import json
 from typing import List, Tuple
 
 import pandas as pd
-from datasets import load_dataset, get_dataset_config_names
 from haystack import Pipeline
 from haystack.components.builders.chat_prompt_builder import ChatPromptBuilder
 from haystack.dataclasses import ChatMessage
@@ -154,7 +153,7 @@ changes = []
 for question_str in tqdm(questions_df["question_str"], desc="Question"):
     response = perturbation_pipeline.run({
         "prompt_builder": {
-            "text": question_str
+            "question": question_str
         }
     })
 
