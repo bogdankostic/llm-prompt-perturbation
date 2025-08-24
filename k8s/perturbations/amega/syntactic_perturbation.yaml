@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: amega-syntactic-perturbation
+spec:
+  template:
+    metadata:
+      labels:
+        app: amega-syntactic-perturbation
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: amega-syntactic-perturbation
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python"]
+        args: ["-u", "/llm_prompt_perturbation/src/perturbations/amega/syntactic/syntactic_perturbation.py"]
+        env:
+        - name: LLM_MODEL_ENDPOINT
+          value: "http://llama-3-3-70b.bdarabisahneh.svc.cluster.local:8000"
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "150"
+        - name: HF_HOME
+          value: "/experiments/huggingface"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+      - name: perturbation-experiments-pvc
+        persistentVolumeClaim:
+          claimName: perturbation-experiments-pvc
