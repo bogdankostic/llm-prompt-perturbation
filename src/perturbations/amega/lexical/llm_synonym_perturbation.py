@@ -64,7 +64,7 @@ subprocess.run(["git", "clone", "https://github.com/DATEXIS/AMEGA-benchmark.git"
 # Perturb cases
 cases_df = pd.read_csv("AMEGA-benchmark/data/cases.csv", sep=";")
 perturbed_cases = []
-changes = []
+all_changes = []
 for case_str in tqdm(cases_df["case_str"], desc="Case"):
     response = perturbation_pipeline.run({
         "prompt_builder": {
@@ -82,13 +82,13 @@ for case_str in tqdm(cases_df["case_str"], desc="Case"):
         }
 
     perturbed_case_str = response_dict["text"]
-    changes = response_dict["changes"]
+    case_changes = response_dict["changes"]
     perturbed_cases.append(perturbed_case_str)
-    changes.append(changes)
+    all_changes.append(case_changes)
 
 # Save perturbed cases
 cases_df["case_str"] = perturbed_cases
-cases_df["changes"] = changes
+cases_df["changes"] = all_changes
 output = {
     "metadata": {
         "description": f"AMEGA cases perturbed with synonyms via LLM",
@@ -149,7 +149,7 @@ perturbation_pipeline.connect("prompt_builder.prompt", "paraphrase_model.message
 # Perturb questions
 questions_df = pd.read_csv("AMEGA-benchmark/data/questions.csv", sep=";")
 perturbed_questions = []
-changes = []
+all_changes = []
 for question_str in tqdm(questions_df["question_str"], desc="Question"):
     response = perturbation_pipeline.run({
         "prompt_builder": {
@@ -167,13 +167,13 @@ for question_str in tqdm(questions_df["question_str"], desc="Question"):
         }
 
     perturbed_question_str = response_dict["question"]
-    changes = response_dict["changes"]
+    question_changes = response_dict["changes"]
     perturbed_questions.append(perturbed_question_str)
-    changes.append(changes)
+    all_changes.append(question_changes)
 
 # Save perturbed questions
 questions_df["question_str"] = perturbed_questions
-questions_df["changes"] = changes
+questions_df["changes"] = all_changes
 output = {
     "metadata": {
         "description": f"AMEGA questions perturbed with synonyms via LLM",
