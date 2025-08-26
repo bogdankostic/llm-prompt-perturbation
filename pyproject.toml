@@ -20,6 +20,8 @@ dependencies = [
     "tiktoken",
     "blobfile",
     "protobuf",
+    "evaluate",
+    "sentence-transformers"
 ]
 
 [tool.hatch.build.targets.wheel]
