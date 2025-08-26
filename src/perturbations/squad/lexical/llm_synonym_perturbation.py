@@ -93,7 +93,7 @@ for sample in tqdm(data, desc="Sample"):
     paragraph = response_dict["paragraph"]
     changes = response_dict["changes"]
     perturbed_data["question"].append(question)
-    perturbed_data["paragraph"].append(paragraph)
+    perturbed_data["context"].append(paragraph)
     perturbed_data["changes"].append(changes)
 
 # Save perturbed data
