@@ -44,7 +44,7 @@ def main():
         squad_dataset = squad_dataset.remove_columns(["context", "question"])
         with open(args.dataset, "r") as f:
             data = json.load(f)["data"]
-        squad_dataset = squad_dataset.add_column("context", [item["paragraph"] for item in data])
+        squad_dataset = squad_dataset.add_column("context", [item["context"] for item in data])
         squad_dataset = squad_dataset.add_column("question", [item["question"] for item in data])
 
     # Build pipeline
@@ -106,7 +106,6 @@ def main():
         f1_scores.append(squad_eval["f1"])
         sas_scores.append(max(sas_eval["individual_scores"]))
 
-
     experiment.add_predictions(predictions)
 
     # Metrics
@@ -121,4 +120,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
