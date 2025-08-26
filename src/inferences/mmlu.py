@@ -79,8 +79,16 @@ def main():
         })
         predictions["dataset"].append(item["dataset"])
         predictions["question"].append(item["question"])
-        predictions["answer"].append(item["answer"])
-        predictions["prediction"].append(response["generator"]["replies"][0].text[0])
+        # Normalize ground-truth answer to letter (A-D)
+        true_answer = item["answer"]
+        if isinstance(true_answer, int):
+            true_answer = answer_mapping[true_answer]
+        predictions["answer"].append(true_answer)
+
+        # Normalize model prediction to a single uppercase letter (A-D)
+        model_text = response["generator"]["replies"][0].text
+        model_letter = str(model_text).strip()[:1].upper() if model_text else ""
+        predictions["prediction"].append(model_letter)
         predictions["output"].append(response["generator"]["replies"][0].text)
 
     experiment.add_predictions(predictions)
