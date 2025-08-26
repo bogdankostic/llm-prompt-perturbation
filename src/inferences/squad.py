@@ -66,6 +66,7 @@ def main():
     pipeline.connect("prompt_builder", "generator")
     squad_evaluator = evaluate.load("squad")
     sas_evaluator = SASEvaluator()
+    sas_evaluator.warm_up()
 
     # Create experiment record
     experiment = Experiment(
