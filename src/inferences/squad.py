@@ -99,8 +99,8 @@ def main():
         predictions["output"].append(response["generator"]["replies"][0].text)
 
         squad_eval = squad_evaluator.compute(
-            predictions={"id": item.get("id"), "prediction_text": model_answer},
-            references={"id": item.get("id"),"answers": item.get("answers")})
+            predictions=[{"id": item.get("id"), "prediction_text": model_answer}],
+            references=[{"id": item.get("id"), "answers": item.get("answers")}])
         sas_eval = sas_evaluator.run(ground_truths, [model_answer] * len(ground_truths))
         em_scores.append(squad_eval["exact_match"])
         f1_scores.append(squad_eval["f1"])
