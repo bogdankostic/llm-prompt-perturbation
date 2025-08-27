@@ -9,6 +9,8 @@ from haystack.components.builders.chat_prompt_builder import ChatPromptBuilder
 from haystack.dataclasses import ChatMessage
 from haystack.utils import Secret
 import pandas as pd
+import vertexai
+from google.oauth2 import service_account
 
 from src.utils.experiment import Experiment
 from src.custom_components.generator.cached_chat_generator import CachedOpenAIChatGenerator
@@ -38,7 +40,15 @@ def main():
     parser.add_argument("--model", type=str, required=True, help="Model to use for generation")
     parser.add_argument("--api-base-url", type=str, default=None, help="API base URL for the model")
     parser.add_argument("--output", type=str, required=True, help="Output path for the experiment results")
+    parser.add_argument("--google-auth-path", type=str, default=None, help="Path to the Google auth file")
     args = parser.parse_args()
+
+    # Initialize Vertex AI
+    if args.google_auth_path is not None:
+        with open(args.google_auth_path, "r") as f:
+            config = json.load(f)
+        credentials = service_account.Credentials.from_service_account_file(args.google_auth_path)
+        vertexai.init(project=config["project_id"], credentials=credentials)
 
     # Clone the AMEGA dataset
     subprocess.run(["git", "clone", "https://github.com/DATEXIS/AMEGA-benchmark.git"])
