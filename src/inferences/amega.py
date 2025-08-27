@@ -48,7 +48,7 @@ def main():
         with open(args.google_auth_path, "r") as f:
             config = json.load(f)
         credentials = service_account.Credentials.from_service_account_file(args.google_auth_path)
-        vertexai.init(project=config["project_id"], credentials=credentials)
+        vertexai.init(project=config["project_id"], credentials=credentials, location="global")
 
     # Clone the AMEGA dataset
     subprocess.run(["git", "clone", "https://github.com/DATEXIS/AMEGA-benchmark.git"])

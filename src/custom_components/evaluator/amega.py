@@ -7,6 +7,8 @@ from haystack.dataclasses.chat_message import ChatMessage
 from vertexai.generative_models import GenerativeModel, GenerationConfig
 import numpy as np
 
+from src.utils.rate_limiter import RateLimiter
+
 PROMPT_TEMPLATE = """Evaluate the text below given the criteria list.
 Therefore, return a list of True or False for each criterion, depending on whether the text below meets this criterion or not.
 Do not evalaute each bullet point of the text separately. Do not justify your decision.
@@ -26,15 +28,26 @@ class AMEGAEvaluator:
         self,
         model: str = "models/gemini-2.5-flash-lite",
         n_eval: int = 8,
+        calls_per_second: float = 2.0,
+        max_retries: int = 5,
+        base_delay: float = 1.0,
     ):
         """
         Initialize the AMEGAEvaluator component.
 
         :param model: The model to use for evaluation.
         :param n_eval: The number of evaluations to generate per question and criteria list combination. Set to 11 in the AMEGA repository, but Gemini API has a limit of 8.
+        :param calls_per_second: Maximum number of API calls per second.
+        :param max_retries: Maximum number of retries for API calls.
+        :param base_delay: Base delay for exponential backoff in seconds.
         """
         self.model = model
         self.n_eval = n_eval
+        self.rate_limiter = RateLimiter(
+            calls_per_second=calls_per_second,
+            max_retries=max_retries,
+            base_delay=base_delay
+        )
         self.prompt_builder = ChatPromptBuilder(template=[ChatMessage.from_user(PROMPT_TEMPLATE)], required_variables=["candidate_response", "criteria_list"])
         self.evaluator = GenerativeModel(
             model_name=self.model,
@@ -49,6 +62,15 @@ class AMEGAEvaluator:
                     }
                 }
             )
+        )
+
+    def _generate_with_retry(self, prompt_text: str):
+        """
+        Generate content with retry logic for rate limiting.
+        """
+        return self.rate_limiter.retry_with_backoff(
+            self.evaluator.generate_content, 
+            contents=prompt_text
         )
 
     @component.output_types(majority_vote=list[bool], mean_rates=list[float], confidence_rate=float, fail_rate=float)
@@ -71,7 +93,10 @@ class AMEGAEvaluator:
         while fail_rate > 0.5:
             criteria_json = json.dumps(criteria_list)
             evaluator_prompt_text = self.prompt_builder.run(candidate_response=model_response, criteria_list=criteria_json)["prompt"][0].text
-            evaluator_model_response = self.evaluator.generate_content(contents=evaluator_prompt_text)
+            
+            # Use retry logic for API call
+            evaluator_model_response = self._generate_with_retry(evaluator_prompt_text)
+            
             candidate_boolean_lists = [self._extract_booleans(candidate.content.parts[0].text) for candidate in evaluator_model_response.candidates if candidate.finish_reason == 1]
             
             if not candidate_boolean_lists:
