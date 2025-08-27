@@ -136,5 +136,3 @@ class AMEGAEvaluator:
         Calculate confidence rate as in the AMEGA reference: 1 - 2 * mean distance from nearest integer.
         """
         return 1 - 2 * np.sum(np.abs(np.round(criterion_true_rate) - criterion_true_rate)) / len(criterion_true_rate)
-
-
