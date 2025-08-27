@@ -30,7 +30,7 @@ class AMEGAEvaluator:
         n_eval: int = 8,
         calls_per_second: float = 2.0,
         max_retries: int = 5,
-        base_delay: float = 1.0,
+        base_delay: float = 10.0,
     ):
         """
         Initialize the AMEGAEvaluator component.
