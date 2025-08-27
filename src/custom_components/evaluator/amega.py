@@ -24,7 +24,7 @@ class AMEGAEvaluator:
 
     def __init__(
         self,
-        model: str = "gemini-2.5-pro",
+        model: str = "models/gemini-2.5-flash-lite",
         n_eval: int = 8,
     ):
         """
@@ -39,6 +39,7 @@ class AMEGAEvaluator:
         self.evaluator = GenerativeModel(
             model_name=self.model,
             generation_config=GenerationConfig(
+                seed=77,
                 candidate_count=self.n_eval,
                 response_mime_type="application/json",
                 response_schema={
@@ -54,7 +55,6 @@ class AMEGAEvaluator:
     def run(self, candidate_response: str, criteria_list: list[str]):
         result_matrix = np.full((self.n_eval, len(criteria_list)), np.nan)
         fail_rate = 1.0
-        original_criteria_list = criteria_list.copy()
 
         # Repeat the evaluation process until the fail rate is below 0.5
         while fail_rate > 0.5:
