@@ -52,14 +52,25 @@ class AMEGAEvaluator:
         )
 
     @component.output_types(majority_vote=list[bool], mean_rates=list[float], confidence_rate=float, fail_rate=float)
-    def run(self, candidate_response: str, criteria_list: list[str]):
+    def run(self, model_response: str, criteria_list: list[str]):
+        """
+        Evaluate the model response against the criteria list.
+        :param model_response: The model response to evaluate.
+        :param criteria_list: The criteria list to evaluate the model response against.
+
+        :return: A dictionary with the following keys
+            - majority_vote: per-criterion majority decision across successful evaluator candidates; True if at least half returned True for that criterion.
+            - mean_rates: per-criterion share of True among successful evaluator candidates in [0.0, 1.0]. This is the empirical true rate used to derive the majority vote and confidence.
+            - confidence_rate: agreement consistency in [0.0, 1.0] computed as 1 - 2 * mean(|round(p) - p|) over per-criterion true rates p. Equals 1.0 for unanimous agreement (all True or all False per criterion), and approaches 0.0 for maximal disagreement (~50/50).
+            - fail_rate: fraction of evaluator candidates that produced unusable outputs (e.g., wrong length/format) in [0.0, 1.0].
+        """
         result_matrix = np.full((self.n_eval, len(criteria_list)), np.nan)
         fail_rate = 1.0
 
         # Repeat the evaluation process until the fail rate is below 0.5
         while fail_rate > 0.5:
             criteria_json = json.dumps(criteria_list)
-            evaluator_prompt_text = self.prompt_builder.run(candidate_response=candidate_response, criteria_list=criteria_json)["prompt"][0].text
+            evaluator_prompt_text = self.prompt_builder.run(candidate_response=model_response, criteria_list=criteria_json)["prompt"][0].text
             evaluator_model_response = self.evaluator.generate_content(contents=evaluator_prompt_text)
             candidate_boolean_lists = [self._extract_booleans(candidate.content.parts[0].text) for candidate in evaluator_model_response.candidates if candidate.finish_reason == 1]
             
@@ -75,8 +86,8 @@ class AMEGAEvaluator:
             # If the fail rate is higher than 0.5, we split the criteria list in half and evaluate each part separately
             if fail_rate > 0.5 and len(criteria_list) > 1:
                 midpoint_index = len(criteria_list) // 2
-                result_first = self.run(candidate_response, criteria_list[:midpoint_index])
-                result_second = self.run(candidate_response, criteria_list[midpoint_index:])
+                result_first = self.run(model_response, criteria_list[:midpoint_index])
+                result_second = self.run(model_response, criteria_list[midpoint_index:])
 
                 # Combine both halves
                 combined_majority_vote = np.concatenate([result_first["majority_vote"], result_second["majority_vote"]])
