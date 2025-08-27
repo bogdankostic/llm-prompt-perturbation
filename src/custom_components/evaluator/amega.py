@@ -60,7 +60,7 @@ class AMEGAEvaluator:
 
         :return: A dictionary with the following keys
             - majority_vote: per-criterion majority decision across successful evaluator candidates; True if at least half returned True for that criterion.
-            - mean_rates: per-criterion share of True among successful evaluator candidates in [0.0, 1.0]. This is the empirical true rate used to derive the majority vote and confidence.
+            - true_rates: per-criterion share of True among successful evaluator candidates in [0.0, 1.0]. This is the empirical true rate used to derive the majority vote and confidence.
             - confidence_rate: agreement consistency in [0.0, 1.0] computed as 1 - 2 * mean(|round(p) - p|) over per-criterion true rates p. Equals 1.0 for unanimous agreement (all True or all False per criterion), and approaches 0.0 for maximal disagreement (~50/50).
             - fail_rate: fraction of evaluator candidates that produced unusable outputs (e.g., wrong length/format) in [0.0, 1.0].
         """
@@ -91,22 +91,22 @@ class AMEGAEvaluator:
 
                 # Combine both halves
                 combined_majority_vote = np.concatenate([result_first["majority_vote"], result_second["majority_vote"]])
-                combined_mean_rates = np.concatenate([result_first["mean_rates"], result_second["mean_rates"]])
+                combined_true_rates = np.concatenate([result_first["true_rates"], result_second["true_rates"]])
                 combined_confidence_rate = (result_first["confidence_rate"] + result_second["confidence_rate"]) / 2
                 fail_rate = (result_first["fail_rate"] + result_second["fail_rate"]) / 2
 
                 return {
                     "majority_vote": combined_majority_vote.tolist(),
-                    "mean_rates": combined_mean_rates.tolist(),
+                    "true_rates": combined_true_rates.tolist(),
                     "confidence_rate": combined_confidence_rate,
                     "fail_rate": np.round(fail_rate, 2),
                 }
             
             if fail_rate <= 0.5:
-                majority_vote, mean_rates, confidence_rate = self._calculate_majority_vote(result_matrix)
+                majority_vote, true_rates, confidence_rate = self._calculate_majority_vote(result_matrix)
                 return {
                     "majority_vote": majority_vote.tolist(),
-                    "mean_rates": mean_rates.tolist(),
+                    "true_rates": true_rates.tolist(),
                     "confidence_rate": confidence_rate,
                     "fail_rate": np.round(fail_rate, 2),
                 }
@@ -115,7 +115,7 @@ class AMEGAEvaluator:
         print("Unexpected failure!")
         return {
             "majority_vote": [np.nan] * len(criteria_list),
-            "mean_rates": [np.nan] * len(criteria_list),
+            "true_rates": [np.nan] * len(criteria_list),
             "confidence_rate": np.nan,
             "fail_rate": np.nan,
         }       
