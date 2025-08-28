@@ -29,7 +29,7 @@ class AMEGAEvaluator:
         model: str = "models/gemini-2.5-flash-lite",
         n_eval: int = 8,
         calls_per_second: float = 2.0,
-        max_retries: int = 5,
+        max_retries: int = 20,
         base_delay: float = 10.0,
     ):
         """
