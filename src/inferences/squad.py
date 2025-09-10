@@ -49,15 +49,16 @@ def main():
 
     # Build pipeline
     prompt_builder = ChatPromptBuilder(template=chat_messages)
+    # New GPT-5 models do not support setting custom temperature value, so it's only set for other models
+    generation_kwargs = {"seed": 77}
+    if not args.model.startswith("gpt-5"):
+        generation_kwargs["temperature"] = 0
     generator = CachedOpenAIChatGenerator(
         model=args.model,
         api_key=Secret.from_env_var("OPENAI_API_KEY") if args.api_base_url is None else Secret.from_env_var("PLACEHOLDER"),
         cache_dir="/experiments/llm-cache",
         api_base_url=args.api_base_url,
-        generation_kwargs={
-            "temperature": 0,
-            "seed": 77,
-        },
+        generation_kwargs=generation_kwargs,
     )
 
     pipeline = Pipeline()
