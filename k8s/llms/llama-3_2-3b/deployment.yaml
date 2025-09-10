@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gemma-3-27b-it
+  name: meta-llama-llama-3-2-3b-instruct
   namespace: bdarabisahneh
   labels:
-    app: gemma-3-27b-it
+    app: meta-llama-llama-3-2-3b-instruct
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gemma-3-27b-it
+      app: meta-llama-llama-3-2-3b-instruct
   template:
     metadata:
       labels:
-        app: gemma-3-27b-it
+        app: meta-llama-llama-3-2-3b-instruct
     spec:
       volumes:
       - name: cache-volume
@@ -25,13 +25,13 @@ spec:
           medium: Memory
           sizeLimit: "2Gi"
       nodeSelector:
-        gpu: h100
+        gpu: v100
       containers:
-      - name: gemma-3-27b-it
+      - name: meta-llama-llama-3-2-3b-instruct
         image: vllm/vllm-openai:latest
         command: ["/bin/sh", "-c"]
         args: [
-          "vllm serve google/gemma-3-27b-it --trust-remote-code --enable-chunked-prefill --tensor-parallel-size 1 --max_num_batched_tokens 1024 --max_model_len 4096"
+          "vllm serve meta-llama/Llama-3.2-3B-Instruct --trust-remote-code --enable-chunked-prefill --max_num_batched_tokens 1024 --max_model_len 4096"
         ]
         env:
         - name: HUGGING_FACE_HUB_TOKEN

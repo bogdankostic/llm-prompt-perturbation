@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gpt-oss-120b-amega-syntactic-syntactic
+spec:
+  template:
+    metadata:
+      labels:
+        app: gpt-oss-120b-amega-syntactic-syntactic
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gpt-oss-120b-amega-syntactic-syntactic
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/amega.py"]
+        args: [
+          "--cases", "/experiments/data/amega/syntactic/syntactic_perturbation_cases.json",
+          "--questions", "/experiments/data/amega/syntactic/syntactic_perturbation_questions.json",
+          "--criteria", "",
+          "--perturbation-type", "syntactic-syntactic",
+          "--model", "unsloth/gpt-oss-120b-BF16",
+          "--output", "/experiments/gpt-oss-120b/amega/syntactic/syntactic.json",
+          "--google-auth-path", "/experiments/google/auth.json",
+          "--api-base-url", "http://gpt-oss-120b.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc

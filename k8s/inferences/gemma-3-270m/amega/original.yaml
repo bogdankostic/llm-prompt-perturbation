@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gemma-3-270m-amega-original
+spec:
+  template:
+    metadata:
+      labels:
+        app: gemma-3-270m-amega-original
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gemma-3-270m-amega-original
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/amega.py"]
+        args: [
+          "--cases", "",
+          "--questions", "",
+          "--criteria", "",
+          "--perturbation-type", "none",
+          "--model", "google/gemma-3-270m-it",
+          "--output", "/experiments/gemma-3-270m/amega/original.json",
+          "--google-auth-path", "/experiments/google/auth.json",
+          "--api-base-url", "http://gemma-3-270m-it.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

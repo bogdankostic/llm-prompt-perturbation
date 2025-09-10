@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gemma-3-1b-mmlu-original
+spec:
+  template:
+    metadata:
+      labels:
+        app: gemma-3-1b-mmlu-original
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gemma-3-1b-mmlu-original
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/original.json",
+          "--perturbation-type", "none",
+          "--model", "google/gemma-3-1b-it",
+          "--output", "/experiments/gemma-3-1b/mmlu/original.json",
+          "--api-base-url", "http://gemma-3-1b-it.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "150"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

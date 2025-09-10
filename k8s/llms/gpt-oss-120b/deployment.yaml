@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: llama-3-3-70b
+  name: gpt-oss-120b
   namespace: bdarabisahneh
   labels:
-    app: llama-3-3-70b
+    app: gpt-oss-120b
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: llama-3-3-70b
+      app: gpt-oss-120b
   template:
     metadata:
       labels:
-        app: llama-3-3-70b
+        app: gpt-oss-120b
     spec:
       volumes:
         - name: cache-volume
@@ -27,12 +27,12 @@ spec:
       nodeSelector:
         gpu: h100
       containers:
-        - name: llama-3-3-70b
+        - name: gpt-oss-120b
           image: vllm/vllm-openai:latest
           command: ["/bin/sh", "-c"]
           args:
             [
-              "vllm serve RedHatAI/Llama-3.3-70B-Instruct-quantized.w8a8 --trust-remote-code --enable-chunked-prefill --gpu-memory-utilization 0.95 --tensor-parallel-size 2 --max_num_batched_tokens 1024 --max_model_len 8192",
+              "vllm serve unsloth/gpt-oss-120b-BF16 --trust-remote-code --enable-chunked-prefill --gpu-memory-utilization 0.95 --tensor-parallel-size 1 --max_num_batched_tokens 1024 --max_model_len 8192",
             ]
           env:
             - name: HUGGING_FACE_HUB_TOKEN

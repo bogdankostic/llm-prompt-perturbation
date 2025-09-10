@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gemma-3-12b-amega-lexical-llm-synonym
+spec:
+  template:
+    metadata:
+      labels:
+        app: gemma-3-12b-amega-lexical-llm-synonym
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gemma-3-12b-amega-lexical-llm-synonym
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/amega.py"]
+        args: [
+          "--cases", "/experiments/data/amega/lexical/llm_synonym_perturbation_cases.json",
+          "--questions", "/experiments/data/amega/lexical/llm_synonym_perturbation_questions.json",
+          "--criteria", "",
+          "--perturbation-type", "lexical-llm-synonym",
+          "--model", "google/gemma-3-12b-it",
+          "--output", "/experiments/gemma-3-12b/amega/lexical/llm_synonym.json",
+          "--api-base-url", "http://gemma-3-12b-it.bdarabisahneh.svc.cluster.local:8000/v1",
+          "--google-auth-path", "/experiments/google/auth.json"
+        ]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+
