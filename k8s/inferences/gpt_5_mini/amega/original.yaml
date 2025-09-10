@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gpt-5-mini-amega-original
+spec:
+  template:
+    metadata:
+      labels:
+        app: gpt-5-mini-amega-original
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gpt-5-mini-amega-original
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/amega.py"]
+        args: [
+          "--cases", "",
+          "--questions", "",
+          "--criteria", "",
+          "--perturbation-type", "none",
+          "--model", "gpt-5-mini-2025-08-07",
+          "--output", "/experiments/gpt_5-mini/amega/original.json",
+          "--google-auth-path", "/experiments/google/auth.json"
+        ]
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key
+              key: api-key
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
