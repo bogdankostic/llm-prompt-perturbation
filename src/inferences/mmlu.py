@@ -42,9 +42,13 @@ def main():
 
     # Create pipeline components
     prompt_builder = ChatPromptBuilder(template=chat_messages)
-    # New GPT-5 models do not support setting custom temperature value, so it's only set for other models
     generation_kwargs = {"seed": 77}
-    if not args.model.startswith("gpt-5"):
+    # Set verbosity to low and reasoning effort to minimal to keep costs low
+    if args.model.startswith("gpt-5"):
+        generation_kwargs["verbosity"] = "low"
+        generation_kwargs["reasoning_effort"] = "minimal"
+    # New GPT-5 models do not support setting custom temperature value, so it's only set for other models
+    else:
         generation_kwargs["temperature"] = 0
     generator = CachedOpenAIChatGenerator(
         model=args.model,
