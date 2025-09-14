@@ -53,7 +53,10 @@ def main():
     # Set reasoning effort to low for GPT-OSS models
     if args.model.startswith("openai/gpt-oss"):
         generation_kwargs["reasoning_effort"] = "low"
-    # Set verbosity to low and reasoning effort to minimal to keep costs low
+    # Turn off reasoning effort for Gemini models
+    if args.model.startswith("gemini"):
+        generation_kwargs["reasoning_effort"] = "none"
+    # Set verbosity to low and reasoning effort to minimal for GPT-5 models
     if args.model.startswith("gpt-5"):
         generation_kwargs["verbosity"] = "low"
         generation_kwargs["reasoning_effort"] = "minimal"
