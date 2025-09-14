@@ -70,6 +70,9 @@ def main():
     model_prompt_builder = ChatPromptBuilder(template=model_chat_messages)
   
     generation_kwargs = {"seed": 77}
+    # Set reasoning effort to low for GPT-OSS models
+    if args.model.startswith("openai/gpt-oss"):
+        generation_kwargs["reasoning_effort"] = "low"
     # Set verbosity to low and reasoning effort to minimal to keep costs low
     if args.model.startswith("gpt-5"):
         generation_kwargs["verbosity"] = "low"
