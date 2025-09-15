@@ -148,7 +148,7 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
         # Gemini-2.5-flash-lite triggers content moderation for one instance of lexical perturbed MMLU
         except AttributeError as e:
             print(f"Error generating response: {e}")
-            response = [ChatMessage.from_assistant("")]
+            response = {"replies": [ChatMessage.from_assistant("")]}
         
         # Cache the response
         self._cache_response(cache_key, response.copy())
