@@ -137,13 +137,18 @@ class CachedOpenAIChatGenerator(OpenAIChatGenerator):
             return cached_response
         
         # If not in cache, generate response using parent class
-        response = super(CachedOpenAIChatGenerator, self).run(
-            messages=messages,
-            streaming_callback=streaming_callback,
-            generation_kwargs=generation_kwargs,
-            tools=tools,
-            tools_strict=tools_strict
-        )
+        try:
+            response = super(CachedOpenAIChatGenerator, self).run(
+                messages=messages,
+                streaming_callback=streaming_callback,
+                generation_kwargs=generation_kwargs,
+                tools=tools,
+                tools_strict=tools_strict
+            )
+        # Gemini-2.5-flash-lite triggers content moderation for one instance of lexical perturbed MMLU
+        except AttributeError as e:
+            print(f"Error generating response: {e}")
+            response = ChatMessage.from_assistant(content="")
         
         # Cache the response
         self._cache_response(cache_key, response.copy())
