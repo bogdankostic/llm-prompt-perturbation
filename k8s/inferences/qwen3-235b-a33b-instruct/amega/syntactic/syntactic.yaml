@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qwen3-235b-a33b-instruct-amega-syntactic-syntactic
+spec:
+  template:
+    metadata:
+      labels:
+        app: qwen3-235b-a33b-instruct-amega-syntactic-syntactic
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: qwen3-235b-a33b-instruct-amega-syntactic-syntactic
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/amega.py"]
+        args: [
+          "--cases", "/experiments/data/amega/syntactic/syntactic_perturbation_cases.json",
+          "--questions", "/experiments/data/amega/syntactic/syntactic_perturbation_questions.json",
+          "--criteria", "",
+          "--perturbation-type", "syntactic-syntactic",
+          "--model", "Qwen/Qwen3-235B-A22B-Instruct-2507-FP8",
+          "--output", "/experiments/qwen3-235b-a33b-instruct/amega/syntactic/syntactic.json",
+          "--api-base-url", "http://qwen3-235b-a33b-instruct.bdarabisahneh.svc.cluster.local:8000/v1",
+          "--google-auth-path", "/experiments/google/auth.json"
+        ]
+        env:
+        - name: PLACEHOLDER
+          valueFrom:
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "600"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

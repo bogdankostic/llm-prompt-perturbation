@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mistral-large-instruct-squad-syntactic
+spec:
+  template:
+    metadata:
+      labels:
+        app: mistral-large-instruct-squad-syntactic
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: mistral-large-instruct-squad-syntactic
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/squad.py"]
+        args: [
+          "--dataset", "/experiments/data/squad/syntactic/syntactic_perturbation.json",
+          "--perturbation-type", "syntactic",
+          "--model", "mistralai/Mistral-Large-Instruct-2411",
+          "--output", "/experiments/mistral-large-instruct/squad/syntactic/syntactic.json",
+          "--api-base-url", "http://mistral-large-instruct.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "300"
+        - name: HF_HOME
+          value: "/experiments/huggingface_cache"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

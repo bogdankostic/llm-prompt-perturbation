@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qwen3-235b-a33b-instruct
+  namespace: bdarabisahneh
+  labels:
+    app: qwen3-235b-a33b-instruct
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qwen3-235b-a33b-instruct
+  template:
+    metadata:
+      labels:
+        app: qwen3-235b-a33b-instruct
+    spec:
+      volumes:
+      - name: cache-volume
+        persistentVolumeClaim:
+          claimName: vllm-cache
+      # vLLM needs to access the host's shared memory for tensor parallel inference.
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: "2Gi"
+      nodeSelector:
+        gpu: a100
+      containers:
+      - name: qwen3-235b-a33b-instruct
+        image: vllm/vllm-openai:latest
+        command: ["/bin/sh", "-c"]
+        args: [
+          "vllm serve Qwen/Qwen3-235B-A22B-Instruct-2507-FP8 --trust-remote-code --enable-chunked-prefill --enable-expert-parallel --tensor-parallel-size 8 --max_num_batched_tokens 1024 --max_model_len 12288"
+        ]
+        env:
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hugging-face-hub-token
+              key: token
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            cpu: "10"
+            memory: 120G
+            nvidia.com/gpu: "8"
+          requests:
+            cpu: "2"
+            memory: 6G
+            nvidia.com/gpu: "8"
+        volumeMounts:
+        - mountPath: /root/.cache/huggingface
+          name: cache-volume
+        - name: shm
+          mountPath: /dev/shm

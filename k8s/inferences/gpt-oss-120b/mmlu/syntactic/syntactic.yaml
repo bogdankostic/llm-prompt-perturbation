@@ -18,16 +18,15 @@ spec:
         args: [
           "--dataset", "/experiments/data/mmlu/syntactic/syntactic_perturbation.json",
           "--perturbation-type", "syntactic",
-          "--model", "unsloth/gpt-oss-120b-BF16",
+          "--model", "openai/gpt-oss-120b",
           "--output", "/experiments/gpt-oss-120b/mmlu/syntactic/syntactic.json",
           "--api-base-url", "http://gpt-oss-120b.bdarabisahneh.svc.cluster.local:8000/v1"
         ]
         env:
-        - name: OPENAI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: openai-api-key
-              key: api-key
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "300"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

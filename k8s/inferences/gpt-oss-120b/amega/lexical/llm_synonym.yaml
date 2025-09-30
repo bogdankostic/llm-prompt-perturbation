@@ -20,17 +20,16 @@ spec:
           "--questions", "/experiments/data/amega/lexical/llm_synonym_perturbation_questions.json",
           "--criteria", "",
           "--perturbation-type", "lexical-llm-synonym",
-          "--model", "unsloth/gpt-oss-120b-BF16",
+          "--model", "openai/gpt-oss-120b",
           "--output", "/experiments/gpt-oss-120b/amega/lexical/llm_synonym.json",
           "--google-auth-path", "/experiments/google/auth.json",
           "--api-base-url", "http://gpt-oss-120b.bdarabisahneh.svc.cluster.local:8000/v1"
         ]
         env:
-        - name: OPENAI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: openai-api-key
-              key: api-key
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "600"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

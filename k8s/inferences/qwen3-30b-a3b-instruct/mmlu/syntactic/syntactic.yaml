@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qwen3-30b-a3b-instruct-mmlu-syntactic
+spec:
+  template:
+    metadata:
+      labels:
+        app: qwen3-30b-a3b-instruct-mmlu-syntactic
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: qwen3-30b-a3b-instruct-mmlu-syntactic
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/syntactic/syntactic_perturbation.json",
+          "--perturbation-type", "syntactic",
+          "--model", "Qwen/Qwen3-30B-A3B-Instruct-2507",
+          "--output", "/experiments/qwen3-30b-a3b-instruct/mmlu/syntactic/syntactic.json",
+          "--api-base-url", "http://qwen3-30b-a3b-instruct.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "300"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

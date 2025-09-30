@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gemini-2-5-flash-mmlu-syntactic
+spec:
+  template:
+    metadata:
+      labels:
+        app: gemini-2-5-flash-mmlu-syntactic
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gemini-2-5-flash-mmlu-syntactic
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/syntactic/syntactic_perturbation.json",
+          "--perturbation-type", "syntactic",
+          "--model", "gemini-2.5-flash",
+          "--api-base-url", "https://generativelanguage.googleapis.com/v1beta/openai/",
+          "--output", "/experiments/gemini-2_5-flash/mmlu/syntactic/syntactic.json"
+        ]
+        env:
+        - name: PLACEHOLDER
+          valueFrom:
+            secretKeyRef:
+              name: gemini-api-key
+              key: api-key
+        - name: OPENAI_TIMEOUT
+          value: "600"
+        - name: OPENAI_MAX_RETRIES
+          value: "20"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc

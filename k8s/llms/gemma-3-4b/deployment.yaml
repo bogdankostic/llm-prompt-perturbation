@@ -25,13 +25,13 @@ spec:
           medium: Memory
           sizeLimit: "2Gi"
       nodeSelector:
-        gpu: v100
+        gpu: a100
       containers:
       - name: gemma-3-4b-it
         image: vllm/vllm-openai:latest
         command: ["/bin/sh", "-c"]
         args: [
-          "vllm serve google/gemma-3-4b-it --trust-remote-code --enable-chunked-prefill --tensor-parallel-size 1 --max_num_batched_tokens 1024 --max_model_len 4096"
+          "vllm serve google/gemma-3-4b-it --trust-remote-code --enable-chunked-prefill --tensor-parallel-size 2 --max_num_batched_tokens 1024 --max_model_len 12288"
         ]
         env:
         - name: HUGGING_FACE_HUB_TOKEN
@@ -45,11 +45,11 @@ spec:
           limits:
             cpu: "10"
             memory: 20G
-            nvidia.com/gpu: "1"
+            nvidia.com/gpu: "2"
           requests:
             cpu: "2"
             memory: 6G
-            nvidia.com/gpu: "1"
+            nvidia.com/gpu: "2"
         volumeMounts:
         - mountPath: /root/.cache/huggingface
           name: cache-volume

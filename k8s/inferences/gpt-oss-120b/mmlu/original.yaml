@@ -18,7 +18,7 @@ spec:
         args: [
           "--dataset", "/experiments/data/mmlu/original.json",
           "--perturbation-type", "none",
-          "--model", "unsloth/gpt-oss-120b-BF16",
+          "--model", "openai/gpt-oss-120b",
           "--output", "/experiments/gpt-oss-120b/mmlu/original.json",
           "--api-base-url", "http://gpt-oss-120b.bdarabisahneh.svc.cluster.local:8000/v1"
         ]
@@ -28,7 +28,7 @@ spec:
         - name: PYTHONUNBUFFERED
           value: "1"
         - name: OPENAI_TIMEOUT
-          value: "150"
+          value: "300"
         volumeMounts:
         - name: perturbation-experiments-pvc
           mountPath: /experiments

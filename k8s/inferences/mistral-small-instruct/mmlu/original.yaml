@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mistral-small-instruct-mmlu-original
+spec:
+  template:
+    metadata:
+      labels:
+        app: mistral-small-instruct-mmlu-original
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: mistral-small-instruct-mmlu-original
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/mmlu.py"]
+        args: [
+          "--dataset", "/experiments/data/mmlu/original.json",
+          "--perturbation-type", "none",
+          "--model", "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+          "--output", "/experiments/mistral-small-instruct/mmlu/original.json",
+          "--api-base-url", "http://mistral-small-instruct.bdarabisahneh.svc.cluster.local:8000/v1"
+        ]
+        env:
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: OPENAI_TIMEOUT
+          value: "300"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
+
+

@@ -31,7 +31,7 @@ spec:
         image: vllm/vllm-openai:latest
         command: ["/bin/sh", "-c"]
         args: [
-          "vllm serve meta-llama/Llama-3.1-8B-Instruct --trust-remote-code --enable-chunked-prefill --max_num_batched_tokens 1024 --max_model_len 4096"
+          "vllm serve meta-llama/Llama-3.1-8B-Instruct --trust-remote-code --enable-chunked-prefill --max_num_batched_tokens 1024 --max_model_len 12288"
         ]
         env:
         - name: HUGGING_FACE_HUB_TOKEN

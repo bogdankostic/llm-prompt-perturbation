@@ -23,11 +23,12 @@ spec:
           "--api-base-url", "http://gemma-3-4b-it.bdarabisahneh.svc.cluster.local:8000/v1"
         ]
         env:
-        - name: OPENAI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: openai-api-key
-              key: api-key
+        - name: PLACEHOLDER
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "600"
+        - name: HF_HOME
+          value: "/experiments/huggingface_cache"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

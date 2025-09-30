@@ -26,11 +26,11 @@ spec:
           "--api-base-url", "http://gpt-oss-20b.bdarabisahneh.svc.cluster.local:8000/v1"
         ]
         env:
-        - name: OPENAI_API_KEY
+        - name: PLACEHOLDER
           valueFrom:
-            secretKeyRef:
-              name: openai-api-key
-              key: api-key
+          value: "placeholder"
+        - name: OPENAI_TIMEOUT
+          value: "600"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

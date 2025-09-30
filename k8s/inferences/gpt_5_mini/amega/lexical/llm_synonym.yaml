@@ -30,6 +30,8 @@ spec:
             secretKeyRef:
               name: openai-api-key
               key: api-key
+        - name: OPENAI_TIMEOUT
+          value: "300"
         - name: PYTHONUNBUFFERED
           value: "1"
         volumeMounts:

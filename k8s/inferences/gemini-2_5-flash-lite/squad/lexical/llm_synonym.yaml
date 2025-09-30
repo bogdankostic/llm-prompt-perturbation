@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gemini-2-5-flash-lite-squad-lexical-llm-synonym
+spec:
+  template:
+    metadata:
+      labels:
+        app: gemini-2-5-flash-lite-squad-lexical-llm-synonym
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: private-registry-auth
+      containers:
+      - name: gemini-2-5-flash-lite-squad-lexical-llm-synonym
+        image: registry.datexis.com/bdarabisahneh/llm-prompt-perturbation:latest
+        command: ["python", "-u", "/llm_prompt_perturbation/src/inferences/squad.py"]
+        args: [
+          "--dataset", "/experiments/data/squad/lexical/llm_synonym_perturbation.json",
+          "--perturbation-type", "lexical-llm-synonym",
+          "--model", "gemini-2.5-flash-lite",
+          "--api-base-url", "https://generativelanguage.googleapis.com/v1beta/openai/",
+          "--output", "/experiments/gemini-2_5-flash-lite/squad/lexical/llm_synonym.json"
+        ]
+        env:
+        - name: PLACEHOLDER
+          valueFrom:
+            secretKeyRef:
+              name: gemini-api-key
+              key: api-key
+        - name: OPENAI_TIMEOUT
+          value: "600"
+        - name: OPENAI_MAX_RETRIES
+          value: "20"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        volumeMounts:
+        - name: perturbation-experiments-pvc
+          mountPath: /experiments
+      volumes:
+        - name: perturbation-experiments-pvc
+          persistentVolumeClaim:
+            claimName: perturbation-experiments-pvc
