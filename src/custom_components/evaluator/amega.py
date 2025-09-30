@@ -26,8 +26,8 @@ class AMEGAEvaluator:
 
     def __init__(
         self,
-        model: str = "models/gemini-2.5-flash-lite",
-        n_eval: int = 8,
+        model: str = "gemini-2.0-flash-lite-001",
+        n_eval: int = 7,
         calls_per_second: float = 2.0,
         max_retries: int = 20,
         base_delay: float = 10.0,
@@ -36,7 +36,9 @@ class AMEGAEvaluator:
         Initialize the AMEGAEvaluator component.
 
         :param model: The model to use for evaluation.
-        :param n_eval: The number of evaluations to generate per question and criteria list combination. Set to 11 in the AMEGA repository, but Gemini API has a limit of 8.
+        :param n_eval: The number of evaluations to generate per question and criteria list combination. 
+                       Set to 11 in the AMEGA repository, but Gemini API has a limit of 8. 
+                       We use a default of 7 in alignment with the AMEGA repository for majority voting and confidence rate calculation.
         :param calls_per_second: Maximum number of API calls per second.
         :param max_retries: Maximum number of retries for API calls.
         :param base_delay: Base delay for exponential backoff in seconds.

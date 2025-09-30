@@ -21,7 +21,9 @@ dependencies = [
     "blobfile",
     "protobuf",
     "evaluate",
-    "sentence-transformers"
+    "sentence-transformers",
+    "google-cloud-aiplatform",
+    "statsmodels",
 ]
 
 [tool.hatch.build.targets.wheel]
