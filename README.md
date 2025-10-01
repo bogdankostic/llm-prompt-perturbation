@@ -12,3 +12,5 @@ Experiments cover the MMLU, SQuAD and AMEGA benchmarks. It contains the code nee
 | `src/notebooks/`     | Jupyter notebooks used for post‑processing and analysis of results.  These notebooks compute different statistics and generate tables and figures.                     |
 | `pyproject.toml`     | Defines project dependencies. Installing the package with `pip install -e .` installs the required libraries.                                                                                                                                                                                           |
 | `Dockerfile`         | Container definition for running the experiments.             |
+| `data/`         | Contains perturbed versions of MMLU, SQuAD, and AMEGA.      |
+| `results/`         | Contains the evaluation results for each model.      |
