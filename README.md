@@ -1,7 +1,7 @@
-# Performance Variance of Large Language Models under Prompt Perturbtion
+# Performance Variance of Large Language Models under Linguistically Principled Prompt Perturbtions
 
-This repository accompanies the master's thesis "*Performance Variance of Large Language Models under Prompt Perturbtion*", which studies how meaning-preserving lexical and syntactic changes influence the performance of LLMs on benchmark tasks.
-Experiments cover the MMLU, SQuAD and AMEGA benchmarks. It contains the code needed to reprodcue the perturbation pipelines, evaluation jobs and analysis described in the thesis.
+This repository accompanies the paper "*Performance Variance of Large Language Models under Linguistically Principled Prompt Perturbtions*", which studies how meaning-preserving lexical and syntactic changes influence the performance of LLMs on benchmark tasks.
+Experiments cover the MMLU, SQuAD and AMEGA benchmarks. It contains the code needed to reprodcue the perturbation pipelines, evaluation jobs and analysis described in the paper.
 
 # Repository Structure
 | Path                 | Description                                                                                                                                                                                                                                                                                                                                                     |
