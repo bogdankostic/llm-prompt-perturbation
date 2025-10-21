@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "llm-prompt-perturbation"
 version = "0.1.0"
 authors = [
-    { name = "Bogdan" }
+    { name = "Bogdan Kostic" }
 ]
 description = "LLM Prompt Perturbation Experiments"
 requires-python = ">=3.10"
