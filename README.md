@@ -1,6 +1,7 @@
-# Performance Variance of Large Language Models under Linguistically Principled Prompt Perturbtions
+# Same Meaning, Different Scores: Lexical and Syntactic Sensitivity in LLM Evaluation
 
-This repository accompanies the paper "*Performance Variance of Large Language Models under Linguistically Principled Prompt Perturbtions*", which studies how meaning-preserving lexical and syntactic changes influence the performance of LLMs on benchmark tasks.
+This repository accompanies the paper "*Same Meaning, Different Scores: Lexical and Syntactic Sensitivity in LLM Evaluation*", published at LREC 2026.
+It studies how meaning-preserving lexical and syntactic changes influence the performance of LLMs on benchmark tasks.
 Experiments cover the MMLU, SQuAD and AMEGA benchmarks. It contains the code needed to reprodcue the perturbation pipelines, evaluation jobs and analysis described in the paper.
 
 # Repository Structure
